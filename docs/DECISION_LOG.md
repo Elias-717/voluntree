@@ -132,3 +132,11 @@ Rules:
 - Reason: Owner's preferred name.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-014 — Next.js agent-rules block kept in AGENTS.md
+- Date: 2026-10-28
+- Change: `AGENTS.md` without Next.js notes → `AGENTS.md` ends with the `nextjs-agent-rules` block that `next dev` (Next.js 16) writes. The block is committed once and left as is; nobody edits or removes it.
+- Affects: `AGENTS.md` (end of file).
+- Reason: `next dev` re-adds the block whenever it is missing, which would leave `AGENTS.md` as an uncommitted change on every branch and cause merge conflicts. With the block committed, `next dev` leaves the file unchanged.
+- Decided by: Elias
+- Supersedes: none

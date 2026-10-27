@@ -141,6 +141,16 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 Update this section after every completed task.
 
 - **Phase:** 0, in progress
-- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-013); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
+- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-014); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
 - **Next:** Elias: merge the Phase 0 PR, import the repo in Vercel, set env vars, confirm the HTTPS URL. Then Task 1 (Phase 1 data foundation). Khathera: Task 1 (tree SVGs) once she joins
 - **Blockers:** Phase 0 exit check needs the Vercel deploy (Elias, dashboard)
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
