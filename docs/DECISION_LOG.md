@@ -124,3 +124,11 @@ Rules:
 - Reason: Parallel work without merge conflicts; each Claude Code session reads its person's tasks first.
 - Decided by: Mohammed Khaled Abdo
 - Supersedes: none
+
+### DEC-013 — Owner referred to as Elias
+- Date: 2026-10-28
+- Change: Owner named "Mohammed" / "Mohammed Khaled Abdo" in the working files → "Elias". `docs/team/MOHAMMED.md` → `docs/team/ELIAS.md`; AI usage log `docs/ai-usage/mohammed.md` → `docs/ai-usage/elias.md`; branch prefix `mohammed/` → `elias/`. Earlier log entries keep "Mohammed Khaled Abdo" because the log is append-only; it refers to the same person.
+- Affects: `AGENTS.md`, `docs/team/ELIAS.md`, `docs/team/KHATHERA.md`.
+- Reason: Owner's preferred name.
+- Decided by: Elias
+- Supersedes: none

@@ -8,7 +8,7 @@ Everything in `AGENTS.md` applies. Where this file is more specific, this file w
 Developer. Khathera owns the self-contained TypeScript modules: the tree, the certificate, matching and the baseline evaluation.
 None of them needs the database or any API key, so she can build and test them on her own.
 
-**Decisions:** Khathera decides details inside her own folders. Anything that affects shared files, other folders, requirements or the plan goes to Mohammed. Ask Khathera, never decide yourself.
+**Decisions:** Khathera decides details inside her own folders. Anything that affects shared files, other folders, requirements or the plan goes to Elias. Ask Khathera, never decide yourself.
 
 ## Folders she owns (edit only these)
 
@@ -23,23 +23,23 @@ None of them needs the database or any API key, so she can build and test them o
 
 Put tests next to the code as `*.test.ts` inside these folders.
 
-## Do not edit (owned by Mohammed)
+## Do not edit (owned by Elias)
 
 Everything else, including `src/types/domain.ts`, `package.json`, the lockfile, config files, `supabase/`, `src/app/`, `AGENTS.md`, `CLAUDE.md`, `docs/DECISION_LOG.md`, `docs/SRS.md`, `docs/PRD.md` and `docs/team/`.
 
-If a task needs a change there (a new dependency, a new shared type, an npm script), write the exact request, stop, and ask Khathera to send it to Mohammed.
+If a task needs a change there (a new dependency, a new shared type, an npm script), write the exact request, stop, and ask Khathera to send it to Elias.
 
 ## Git routine
 
 1. At the start of every session, pull `main`.
 2. Create one branch per task, named `khathera/<task>`, e.g. `khathera/tree`.
 3. Commit only when Khathera asks. Messages start with the FR ID.
-4. Open a pull request into `main`. Mohammed merges it.
+4. Open a pull request into `main`. Elias merges it.
 5. If the task changes a decision, propose the decision-log entry in the pull request description. Do not edit the log.
 
 ## Before starting
 
-Check that Mohammed's Phase 0 work is on `main`: `package.json` with vitest and pdf-lib, and `src/types/domain.ts`.
+Check that Elias's Phase 0 work is on `main`: `package.json` with vitest and pdf-lib, and `src/types/domain.ts`.
 
 - If vitest or pdf-lib is missing, only the SVG part of Task 1 can start. Tell Khathera.
 - Task 3 cannot start until `src/types/domain.ts` exists.
@@ -110,10 +110,10 @@ Wait for `src/types/domain.ts` and use only its types.
    - time conflicts offered
 3. Report honestly, including cases where the baseline wins.
 4. Ask Khathera how large the simulation should be (number of students and missions).
-5. Ask Mohammed, through Khathera, to add an npm script so the results can be reproduced with one command.
+5. Ask Elias, through Khathera, to add an npm script so the results can be reproduced with one command.
 
 **Done when:** one command reproduces the same numbers every time.
 
 ## Hand-off
 
-Mohammed's screens import these functions. Do not change a function's name or inputs once its pull request is merged without asking first.
+Elias's screens import these functions. Do not change a function's name or inputs once its pull request is merged without asking first.

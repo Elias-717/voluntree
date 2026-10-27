@@ -3,7 +3,7 @@
 Read this file at the start of every session, before doing anything else.
 It holds the working rules, the project direction, the phase plan and the current status.
 
-Owner: Mohammed Khaled Abdo
+Owner: Elias
 
 ---
 
@@ -13,21 +13,21 @@ Two people work on this repo, each with their own Claude Code session.
 
 | Person | Role | Assignment file |
 |---|---|---|
-| Mohammed Khaled Abdo | Owner and lead. Makes project-wide decisions and merges pull requests | `docs/team/MOHAMMED.md` |
+| Elias | Owner and lead. Makes project-wide decisions and merges pull requests | `docs/team/ELIAS.md` |
 | Khathera | Developer. Owns the tree, certificate, matching and evaluation modules | `docs/team/KHATHERA.md` |
 
 At the start of every session:
 
-1. If the person has not said who they are, ask: "Am I working with Mohammed or Khathera?"
+1. If the person has not said who they are, ask: "Am I working with Elias or Khathera?"
 2. Read that person's assignment file before anything else. It lists their folders, their tasks in order, and what they must not edit.
-3. Follow the rules below. In them, "the owner" means the person you are working with for decisions inside their own folders, and Mohammed for anything shared or project-wide.
+3. Follow the rules below. In them, "the owner" means the person you are working with for decisions inside their own folders, and Elias for anything shared or project-wide.
 
 **Rules to avoid merge conflicts:**
 
 - Edit only the folders the person owns.
-- Only Mohammed's sessions edit `src/types/domain.ts`, `package.json`, the lockfile, config files, `AGENTS.md`, `CLAUDE.md`, `docs/DECISION_LOG.md`, `docs/SRS.md`, `docs/PRD.md` and `docs/team/`.
+- Only Elias's sessions edit `src/types/domain.ts`, `package.json`, the lockfile, config files, `AGENTS.md`, `CLAUDE.md`, `docs/DECISION_LOG.md`, `docs/SRS.md`, `docs/PRD.md` and `docs/team/`.
 - Khathera's sessions request changes to those files through her. They never edit them.
-- Each person works on their own branches and opens pull requests into `main`. Mohammed merges.
+- Each person works on their own branches and opens pull requests into `main`. Elias merges.
 
 ---
 
@@ -47,8 +47,8 @@ The owner makes the decisions. Your job is to propose, ask, and then build exact
 4. **During a task:** make the smallest change that satisfies it. If you notice another problem, list it at the end. Do not fix it.
 5. **After each task:** report the files changed and how you verified them (tests run, results). Update section 7, "Current status". Propose the next task from the phase plan, but do not start it.
 6. **Conflicts:** if a request conflicts with the SRS, PRD or decision log, stop, quote both, and ask which one wins.
-7. **Decision log:** every change to scope, requirements, design, data model, plan or pitch that the owner approves gets a new entry in `docs/DECISION_LOG.md`, using the format in that file. Entries are append-only. Code that implements an existing requirement does not need an entry. Only Mohammed's sessions edit the log; Khathera's sessions propose entries in the pull request description.
-8. **AI usage log:** record every AI tool, model and prompt used, including yourself as a coding assistant, in the person's own log: `docs/ai-usage/mohammed.md` or `docs/ai-usage/khathera.md`. The competition declaration form depends on it.
+7. **Decision log:** every change to scope, requirements, design, data model, plan or pitch that the owner approves gets a new entry in `docs/DECISION_LOG.md`, using the format in that file. Entries are append-only. Code that implements an existing requirement does not need an entry. Only Elias's sessions edit the log; Khathera's sessions propose entries in the pull request description.
+8. **AI usage log:** record every AI tool, model and prompt used, including yourself as a coding assistant, in the person's own log: `docs/ai-usage/elias.md` or `docs/ai-usage/khathera.md`. The competition declaration form depends on it.
 9. **Evidence:** never invent survey results, quotes, metrics or dates. Leave `[BRACKETS]` placeholders until the owner supplies the real data.
 10. **Data:** synthetic data only. No real student data.
 11. **Secrets:** never commit keys. Keys live in `.env.local` and Vercel environment variables. The Gemini key and the Supabase service-role key are used only on the server.
@@ -125,7 +125,7 @@ Finish each phase's exit check before starting the next. If time runs out, cut s
 
 Ask the owner about these when they become relevant. Do not decide them yourself.
 
-1. Team: Mohammed and Khathera so far. Are more members joining, and does everyone meet the final-year eligibility rule (SRS §15)?
+1. Team: Elias and Khathera so far. Are more members joining, and does everyone meet the final-year eligibility rule (SRS §15)?
 2. Official competition dates.
 3. What happens to a certificate when its approval is revoked.
 4. Demo seed: should one student start at 2 waterings so the tree visibly grows in demo step 6?
@@ -141,6 +141,6 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 Update this section after every completed task.
 
 - **Phase:** 0, not started
-- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-012); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`
-- **Next:** Mohammed: Task 0 (Phase 0 setup). Khathera: Task 1 (tree SVGs) once she joins
+- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-013); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`
+- **Next:** Elias: Task 0 (Phase 0 setup). Khathera: Task 1 (tree SVGs) once she joins
 - **Blockers:** none recorded
