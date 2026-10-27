@@ -7,6 +7,30 @@ Owner: Mohammed Khaled Abdo
 
 ---
 
+## 0. Start here: who are you working with?
+
+Two people work on this repo, each with their own Claude Code session.
+
+| Person | Role | Assignment file |
+|---|---|---|
+| Mohammed Khaled Abdo | Owner and lead. Makes project-wide decisions and merges pull requests | `docs/team/MOHAMMED.md` |
+| Khathera | Developer. Owns the tree, certificate, matching and evaluation modules | `docs/team/KHATHERA.md` |
+
+At the start of every session:
+
+1. If the person has not said who they are, ask: "Am I working with Mohammed or Khathera?"
+2. Read that person's assignment file before anything else. It lists their folders, their tasks in order, and what they must not edit.
+3. Follow the rules below. In them, "the owner" means the person you are working with for decisions inside their own folders, and Mohammed for anything shared or project-wide.
+
+**Rules to avoid merge conflicts:**
+
+- Edit only the folders the person owns.
+- Only Mohammed's sessions edit `src/types/domain.ts`, `package.json`, the lockfile, config files, `AGENTS.md`, `CLAUDE.md`, `docs/DECISION_LOG.md`, `docs/SRS.md`, `docs/PRD.md` and `docs/team/`.
+- Khathera's sessions request changes to those files through her. They never edit them.
+- Each person works on their own branches and opens pull requests into `main`. Mohammed merges.
+
+---
+
 ## 1. Working rules
 
 The owner makes the decisions. Your job is to propose, ask, and then build exactly what was approved.
@@ -23,12 +47,12 @@ The owner makes the decisions. Your job is to propose, ask, and then build exact
 4. **During a task:** make the smallest change that satisfies it. If you notice another problem, list it at the end. Do not fix it.
 5. **After each task:** report the files changed and how you verified them (tests run, results). Update section 7, "Current status". Propose the next task from the phase plan, but do not start it.
 6. **Conflicts:** if a request conflicts with the SRS, PRD or decision log, stop, quote both, and ask which one wins.
-7. **Decision log:** every change to scope, requirements, design, data model, plan or pitch that the owner approves gets a new entry in `docs/DECISION_LOG.md`, using the format in that file. Entries are append-only. Code that implements an existing requirement does not need an entry.
-8. **AI usage log:** record every AI tool, model and prompt used, including yourself as a coding assistant, in `docs/AI_USAGE_LOG.md`. The competition declaration form depends on it.
+7. **Decision log:** every change to scope, requirements, design, data model, plan or pitch that the owner approves gets a new entry in `docs/DECISION_LOG.md`, using the format in that file. Entries are append-only. Code that implements an existing requirement does not need an entry. Only Mohammed's sessions edit the log; Khathera's sessions propose entries in the pull request description.
+8. **AI usage log:** record every AI tool, model and prompt used, including yourself as a coding assistant, in the person's own log: `docs/ai-usage/mohammed.md` or `docs/ai-usage/khathera.md`. The competition declaration form depends on it.
 9. **Evidence:** never invent survey results, quotes, metrics or dates. Leave `[BRACKETS]` placeholders until the owner supplies the real data.
 10. **Data:** synthetic data only. No real student data.
 11. **Secrets:** never commit keys. Keys live in `.env.local` and Vercel environment variables. The Gemini key and the Supabase service-role key are used only on the server.
-12. **Git:** commit only when the owner asks. Use small commits whose message starts with the FR ID, e.g. `FR-009: idempotent watering on approval`. Never force-push.
+12. **Git:** pull `main` at the start of every session. Work on a branch named `<person>/<task>`. Commit only when the person asks. Use small commits whose message starts with the FR ID, e.g. `FR-009: idempotent watering on approval`. Never force-push.
 13. **Explainability:** keep the code simple enough for every team member to explain in the judges' Q&A. No clever abstractions.
 
 ## 2. Source of truth
@@ -88,7 +112,7 @@ Finish each phase's exit check before starting the next. If time runs out, cut s
 
 | Phase | Scope | IDs | Exit check |
 |---|---|---|---|
-| 0. Setup | Scaffold Next.js; link Supabase and Vercel; env vars; empty `AI_USAGE_LOG.md` | NFR-10 | Blank app deployed on an HTTPS Vercel URL |
+| 0. Setup | Scaffold Next.js; install all known dependencies; vitest config; `src/types/domain.ts`; link Supabase and Vercel; env vars; empty files in `docs/ai-usage/` | NFR-10 | Blank app deployed on an HTTPS Vercel URL; `domain.ts` on `main` |
 | 1. Data foundation | Tables from SRS §7 as amended by the log; RLS; functions `accept_mission`, `approve_completion`, `revoke_completion`; seed of 8 students, 1 organizer and 1 admin | FR-001, FR-002, FR-006, FR-008, FR-009, BR-01–BR-13 | DB tests pass: capacity never exceeded under concurrency, double approval gives one watering and one certificate, revocation without a reason is rejected |
 | 2. Core journey, no AI | Screen list agreed with the owner first. Then: manual mission form, publish, accept, approve attendance, tree, PDF certificate, polling updates, consent screen | FR-004, FR-005, FR-006, FR-008, FR-010, FR-011, FR-025, FR-027 | The whole journey works by hand on the deployed URL |
 | 3. Matching and fairness | Hard filters, transparent score, exposure balancing, cold-start rule, "Why recommended", override with a logged reason | FR-007, FR-024, BR-11 | Seeded fixtures give deterministic rankings; conflicting and unqualified students are excluded |
@@ -101,7 +125,7 @@ Finish each phase's exit check before starting the next. If time runs out, cut s
 
 Ask the owner about these when they become relevant. Do not decide them yourself.
 
-1. Team members and final-year eligibility (SRS §15).
+1. Team: Mohammed and Khathera so far. Are more members joining, and does everyone meet the final-year eligibility rule (SRS §15)?
 2. Official competition dates.
 3. What happens to a certificate when its approval is revoked.
 4. Demo seed: should one student start at 2 waterings so the tree visibly grows in demo step 6?
@@ -117,6 +141,6 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 Update this section after every completed task.
 
 - **Phase:** 0, not started
-- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-011); `AGENTS.md`, `CLAUDE.md` and `docs/` (SRS, PRD, decision log) pushed to `Elias-717/voluntree`
-- **Next:** Phase 0 setup, after the owner confirms where the build runs and approves the scaffold
+- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-012); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`
+- **Next:** Mohammed: Task 0 (Phase 0 setup). Khathera: Task 1 (tree SVGs) once she joins
 - **Blockers:** none recorded

@@ -116,3 +116,11 @@ Rules:
 - Reason: Privacy and no comparison between students.
 - Decided by: Mohammed Khaled Abdo
 - Supersedes: none
+
+### DEC-012 — Team split and conflict rules
+- Date: 2026-10-28
+- Change: single-owner workflow → two-person team. Mohammed Khaled Abdo is owner and lead. Khathera owns `public/tree/`, `src/lib/tree/`, `src/lib/certificate/`, `src/lib/matching/` and `scripts/evaluate/`. Mohammed owns everything else, including shared types, dependencies, config, `AGENTS.md` and the decision log. One branch per person and task, pull requests into `main`, Mohammed merges. The AI usage log is split per person into `docs/ai-usage/`. Each person has an assignment file in `docs/team/`.
+- Affects: `AGENTS.md` §0, rules 7, 8 and 12, §5 Phase 0, §6 Q1, §7. New `docs/team/MOHAMMED.md` and `docs/team/KHATHERA.md`. SRS §15 (team roles) not yet updated.
+- Reason: Parallel work without merge conflicts; each Claude Code session reads its person's tasks first.
+- Decided by: Mohammed Khaled Abdo
+- Supersedes: none
