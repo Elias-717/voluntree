@@ -140,7 +140,7 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 
 Update this section after every completed task.
 
-- **Phase:** 0, not started
-- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-013); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`
-- **Next:** Elias: Task 0 (Phase 0 setup). Khathera: Task 1 (tree SVGs) once she joins
-- **Blockers:** none recorded
+- **Phase:** 0, in progress
+- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-013); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
+- **Next:** Elias: merge the Phase 0 PR, import the repo in Vercel, set env vars, confirm the HTTPS URL. Then Task 1 (Phase 1 data foundation). Khathera: Task 1 (tree SVGs) once she joins
+- **Blockers:** Phase 0 exit check needs the Vercel deploy (Elias, dashboard)
