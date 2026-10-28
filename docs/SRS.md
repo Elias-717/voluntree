@@ -18,7 +18,7 @@ Campus events at AIU depend on student volunteers, but recruitment is manual (gr
 
 - Secondary user: Event organizer (club officer or staff who needs the right volunteers quickly and a trustworthy participation record).
 
-- Tertiary user: Administrator (student affairs or events office who needs oversight and audit).
+- Tertiary user: Administrator (student affairs or events office who needs oversight and audit, posts school-level opportunities with eligibility criteria, and records dean approvals).
 
 ### 1.3 Measurable outcomes (hypotheses to validate)
 
@@ -58,7 +58,7 @@ Requirement IDs are stable for traceability. The competition requires at least o
 
 - Synthetic demonstration data only, unless written consent and institutional approval exist.
 
-- Three roles: STUDENT, ORGANIZER, ADMIN. No role self-elevation.
+- Three roles: STUDENT, ORGANIZER, ADMIN. No role self-elevation. Deans are not system users; when a mission requires dean approval, an admin records the dean's decision on the dean's behalf (FR-030).
 
 - All watering, approval and certificate actions run on the trusted server.
 
@@ -70,8 +70,11 @@ Requirement IDs are stable for traceability. The competition requires at least o
 
 | Action                     | Student      | Organizer               | Admin                                          |
 |----------------------------|--------------|-------------------------|------------------------------------------------|
-| View eligible missions     | Yes          | Yes                     | Yes                                            |
+| View eligible missions     | Only missions whose criteria they meet (FR-029) | Yes | Yes                                  |
 | Create and publish mission | No           | Own organization        | All authorized                                 |
+| Set eligibility criteria (schools, minimum CGPA, dean approval) | No | No | Yes                                |
+| Record dean approval of a student | No    | No                      | Yes, on the dean's behalf, audited             |
+| View a student's CGPA      | Own          | No (meets criteria: yes/no only) | Yes                                   |
 | Accept own assignment      | Yes          | No                      | No                                             |
 | Verify participation       | No           | Own missions            | Override with audit                            |
 | Edit waterings directly    | No           | No                      | No (audited revocation entry with reason only) |
@@ -93,7 +96,7 @@ The system shall enforce role checks on the server and at row level. Acceptance:
 
 #### FR-004 \[M\] Mission Creation and Publishing
 
-Organizers shall create and publish a mission with title, description, required skills, place, time window, capacity, verification policy and safety notes. Acceptance: incomplete or invalid missions cannot be published; valid missions appear to eligible students.
+Organizers and admins shall create and publish a mission with title, description, required skills, place, time window, capacity, verification policy and safety notes. Admins may also set eligibility criteria (FR-029). Acceptance: incomplete or invalid missions cannot be published; valid missions appear to eligible students (FR-029).
 
 #### FR-005 \[M\] Mission Lifecycle (simplified)
 
@@ -101,11 +104,11 @@ Mission states: DRAFT, PUBLISHED, IN_PROGRESS, PENDING_VERIFICATION, COMPLETED, 
 
 #### FR-006 \[M\] Mission Acceptance
 
-Students shall accept a mission. Withdrawal before an organizer-defined cutoff is Stretch for the Oct 29 build. Acceptance: no duplicate active assignment; capacity is never exceeded under concurrent requests.
+Students shall accept a mission. Withdrawal before an organizer-defined cutoff is Stretch for the Oct 29 build. Acceptance: no duplicate active assignment; capacity is never exceeded under concurrent requests; a student who does not meet the mission's criteria cannot accept it (FR-029); when dean approval is required, acceptance enters PENDING_DEAN_APPROVAL and counts toward capacity (FR-030).
 
 #### FR-007 \[M\] Explainable Volunteer Matching
 
-Matching shall first exclude hard conflicts (time overlap, required eligibility, capacity), then rank the remaining students by a transparent weighted score (section 10). Acceptance: seeded fixtures give deterministic results; every recommendation shows a Why recommended panel listing the factors that applied.
+Matching shall first exclude hard conflicts (time overlap, required eligibility including school and minimum CGPA (FR-029), capacity), then rank the remaining students by a transparent weighted score (section 10). CGPA is never a score factor (BR-15). Acceptance: seeded fixtures give deterministic results; every recommendation shows a Why recommended panel listing the factors that applied.
 
 #### FR-008 \[M\] Participation Verification
 
@@ -127,6 +130,18 @@ Student and organizer screens shall reflect approvals through real-time events, 
 
 Each student shall see a tree with five stages: seed (0 waterings), sprout (3), sapling (6), young tree (9) and full tree (12). The stage is derived from the student's net watering count in the ledger (FR-009); the step of 3 is a configuration value. After 12 waterings the tree stays full while waterings keep counting. The tree never shrinks except when an admin revokes an approval (FR-009), and it is visible only to that student (BR-13). Acceptance: an approval that crosses a stage threshold shows the next stage on the student's screen; repeating the approval leaves the stage unchanged.
 
+#### FR-028 \[M\] Student School and CGPA
+
+On registration each student shall declare their school (SBSS, SEHS, SCI, CFGS or LC) and may declare their current CGPA (0.00 to 4.00). A blank CGPA means none declared yet. Students may update their CGPA at any time; every change is recorded in the audit trail with the old and new value. CGPA is self-declared and not verified by the system. It is visible only to the student and to admins; organizers see only whether a student meets a mission's criteria. Acceptance: school is required; a CGPA outside the range is rejected; a CGPA change creates an audit entry with the old value; an organizer request for a student's CGPA returns forbidden.
+
+#### FR-029 \[M\] Mission Eligibility Criteria
+
+From the admin dashboard, an admin may set on any mission: eligible schools (one or more; none means all schools), a minimum CGPA (none means no threshold), and whether dean approval is required (FR-030). Organizers cannot set criteria; their missions are open to all students. A student is eligible when their school is in the list (or the list is empty) and, if a minimum CGPA is set, their declared CGPA is at least that value. A student with no declared CGPA is not eligible for a CGPA-gated mission. Missions a student is not eligible for are hidden from that student in browsing and recommendations, and the server rejects their acceptance. Acceptance: an organizer request to set criteria returns forbidden; a mission with no criteria is shown to every student; a CGPA equal to the minimum is eligible; an ineligible student's direct accept request returns forbidden.
+
+#### FR-030 \[M\] Dean Approval of Participation
+
+When a mission requires dean approval, a student's acceptance enters PENDING_DEAN_APPROVAL and holds a slot. An admin records the dean's decision on the dean's behalf: approval moves the assignment to ACCEPTED; rejection moves it to DEAN_REJECTED and frees the slot. Each decision records actor and timestamp. Acceptance: pending requests count toward capacity; a rejection frees the slot; the student sees the pending, approved or rejected status; only an admin can record the decision; a student who is not ACCEPTED cannot receive a watering or certificate.
+
 ### 5.2 AI and responsible-AI features (Must-have)
 
 #### FR-023 \[M\] LLM-Assisted Mission Intake (human in the loop)
@@ -139,11 +154,11 @@ The ranking shall include an exposure-balancing factor that raises students who 
 
 #### FR-025 \[M\] Consent and Transparency Screen
 
-On first login students shall see a plain-language notice stating what data is used (declared skills and availability only), that participation is optional, how to opt out, and that humans make final decisions. A consent version is stored per user. Acceptance: a student who opts out of matching is excluded from ranking but can still browse missions; the screen is shown in the demo.
+On first login students shall see a plain-language notice stating what data is used (declared skills and availability for ranking; declared school and CGPA only to check eligibility for missions that set criteria), that some opportunities are restricted by school criteria, that participation is optional, how to opt out, and that humans make final decisions. A consent version is stored per user. Acceptance: a student who opts out of matching is excluded from ranking but can still browse the missions they are eligible for; the screen is shown in the demo.
 
 #### FR-026 \[M\] Baseline Evaluation Report
 
-The system (or a documented script) shall compare Voluntree matching with a first-come-first-served baseline on the seeded dataset and output the metrics in section 1.3. Acceptance: results are reproducible from the README and shown honestly, including trade-offs and cases where the baseline wins.
+The system (or a documented script) shall compare Voluntree matching with a first-come-first-served baseline on the seeded dataset and output the metrics in section 1.3. For missions with eligibility criteria, opportunity spread is reported within the eligible pool, and the report states the share of missions that are gated. Acceptance: results are reproducible from the README and shown honestly, including trade-offs and cases where the baseline wins.
 
 ### 5.3 Should-have (only after all Must-haves pass)
 
@@ -194,16 +209,19 @@ Expiring one-use QR or check-in nonce; replay rejected; doubtful events flagged 
 | BR-11   | AI recommendations are advisory; the student and organizer decide. Overrides require a logged reason.                                                                         |
 | BR-12   | Only admin-approved templates may represent AIU as certificate issuer. For the demo, certificates are labeled as a prototype and not an official AIU document.                |
 | BR-13   | A student's tree is visible only to that student.                                                                                                                             |
+| BR-14   | Eligibility criteria (eligible schools, minimum CGPA, dean approval required) are set only by an admin.                                                                       |
+| BR-15   | CGPA is used only as an admin-set eligibility threshold. It is never a ranking factor, never inferred, and never shown to organizers or other students.                     |
+| BR-16   | When dean approval is required, a student is not confirmed until an admin records the dean's approval. A pending request holds a slot; a rejection frees it.                 |
 
 ## 7. Data Model
 
 | Entity            | Key fields (illustrative)                                                                                  | Constraints                                                       |
 |-------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | User              | id, auth_subject, role, display_name, consent_version                                                      | Unique auth_subject; soft deactivation                            |
-| StudentProfile    | user_id, skills\[\], availability, matching_opt_out                                                        | Private by default                                                |
+| StudentProfile    | user_id, skills\[\], availability, matching_opt_out, school (SBSS, SEHS, SCI, CFGS or LC), cgpa (nullable) | Private by default; cgpa 0.00 to 4.00; cgpa visible to the student and admins only; every cgpa change audited with old and new value |
 | Organization      | id, name, organizer_ids                                                                                    | Scoped permission boundary                                        |
-| Mission           | id, organization_id, title, required_skills\[\], start, end, capacity, status, source (manual or ai_draft) | end later than start                                              |
-| MissionAssignment | id, mission_id, student_id, status, applied_at, recommendation_id                                          | Unique active student+mission; capacity protected                 |
+| Mission           | id, organization_id, title, required_skills\[\], start, end, capacity, status, source (manual or ai_draft), eligible_schools\[\], min_cgpa (nullable), dean_approval_required | end later than start; empty eligible_schools means all; criteria fields set by admin only |
+| MissionAssignment | id, mission_id, student_id, status, applied_at, recommendation_id, dean_decided_by, dean_decided_at        | Unique active student+mission; capacity protected; PENDING_DEAN_APPROVAL counts toward capacity |
 | Recommendation    | id, mission_id, student_id, score, factors (JSON), algorithm_version                                       | Stored for explainability and audit                               |
 | Completion        | id, assignment_id, approved_by, status                                                                     | Unique approved completion per assignment                         |
 | WateringLedger    | id, user_id, completion_id, delta, reason, idempotency_key                                                 | Unique idempotency key; revocations are new entries with a reason |
@@ -211,7 +229,7 @@ Expiring one-use QR or check-in nonce; replay rejected; doubtful events flagged 
 | Notification      | id, user_id, type, payload, read_at                                                                        | Recipient only                                                    |
 | AiUsageLog        | id, feature, model, version, prompt_hash, created_at                                                       | Feeds the declaration form                                        |
 | OverrideLog       | id, actor_id, mission_id, reason                                                                           | Human override of AI ranking                                      |
-| AuditEvent        | id, actor_id, entity, action, created_at                                                                   | Append-only                                                       |
+| AuditEvent        | id, actor_id, entity, action, details (JSON, e.g. old and new CGPA), created_at                            | Append-only                                                       |
 
 Section 7 note: Reward tables are deferred with FR-017.
 
@@ -219,7 +237,7 @@ Section 7 note: Reward tables are deferred with FR-017.
 
 Mission: DRAFT to PUBLISHED to IN_PROGRESS to PENDING_VERIFICATION to COMPLETED. CANCELLED is allowed before completion with an audit entry and notification to affected students, with no penalty.
 
-Assignment: APPLIED or INVITED to ACCEPTED to SUBMITTED to APPROVED or REJECTED. CHECKED_IN is added only if FR-016 is implemented.
+Assignment: APPLIED or INVITED to ACCEPTED to SUBMITTED to APPROVED or REJECTED. CHECKED_IN is added only if FR-016 is implemented. When the mission requires dean approval (FR-030): APPLIED or INVITED to PENDING_DEAN_APPROVAL to ACCEPTED or DEAN_REJECTED. PENDING_DEAN_APPROVAL counts toward capacity; DEAN_REJECTED does not.
 
 Certificate issuance is triggered only by an APPROVED completion.
 
@@ -233,7 +251,9 @@ This section is built into the product, not only documented, because the rubric 
 
 - Consent: FR-025 consent screen with opt-out and stored consent version.
 
-- Data minimization: the matching algorithm uses only declared skills, declared availability, existing assignment conflicts and optional coarse distance. It never uses grades, gender, nationality, religion or other protected or sensitive attributes, and never infers them.
+- Data minimization: the matching score uses only declared skills, declared availability, existing assignment conflicts and optional coarse distance. It never uses grades, gender, nationality, religion or other protected or sensitive attributes, and never infers them. The only use of grades is a minimum CGPA that an admin sets on a mission; it is applied as a hard eligibility filter before ranking, never as a score factor (BR-15). CGPA is self-declared, visible only to the student and admins, and every change is audited (FR-028). Where a school requires it, dean approval (FR-030) is the human check on declared CGPA.
+
+- Eligibility and fairness: eligibility is a policy decision made by a human (the admin) per mission (FR-029). Fairness balancing (FR-024) then applies among the eligible students. Missions without criteria are the default and are open to every student.
 
 - Explainability: every recommendation shows its factors (FR-007).
 
@@ -249,7 +269,7 @@ This section is built into the product, not only documented, because the rubric 
 
 ## 10. Matching Algorithm Contract
 
-Stage 1: Filter out students with time conflicts, missing required eligibility, matching opt-out, or a full mission. Stage 2: Compute a transparent weighted score for the remaining students.
+Stage 1: Filter out students with time conflicts, missing required eligibility, a school not in the mission's eligible schools, a CGPA below the mission's minimum or no declared CGPA when a minimum is set (FR-029), matching opt-out, or a full mission. Stage 2: Compute a transparent weighted score for the remaining students. CGPA never enters Stage 2 (BR-15); opportunity balance and the cold-start rule apply within the eligible pool.
 
 | Factor               | Starting weight | Notes                                                        |
 |----------------------|-----------------|--------------------------------------------------------------|
@@ -273,7 +293,7 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | NFR-06 | Reliability     | Transactional watering issuance, idempotent retries, recoverable failed PDF generation.                   |
 | NFR-07 | Integrity       | Append-only audit and ledger corrections.                                                                 |
 | NFR-08 | Maintainability | Typed APIs, automated tests on core rules, reproducible setup and README.                                 |
-| NFR-09 | Responsible AI  | Explainable factors, no protected-trait scoring, human override, no fabricated mission details.           |
+| NFR-09 | Responsible AI  | Explainable factors, no protected-trait or grade scoring (CGPA only as an admin-set eligibility filter), human override, no fabricated mission details. |
 | NFR-10 | Deployment      | HTTPS demo URL with demo accounts, no privileged credentials exposed, and a recorded fallback demo video. |
 | NFR-11 | Retention       | Documented retention and deletion policy.                                                                 |
 
@@ -291,16 +311,23 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | Student impersonates organizer               | Server-side RBAC rejects                                     |
 | Notification delivery fails                  | In-app inbox retains the event                               |
 | Mission cancelled after sign-up              | Students notified; no penalty                                |
+| Student with no CGPA and a CGPA-gated mission | Mission hidden; acceptance rejected                         |
+| Ineligible student calls the accept endpoint directly | Server rejects (FR-029)                             |
+| Organizer tries to set eligibility criteria  | Server rejects (BR-14)                                       |
+| Dean approval pending when the mission fills | Pending request keeps its slot; others get a full response   |
+| Dean rejects a pending student               | Slot freed; no watering or certificate                       |
 
 ## 13. API / Service Interfaces (Conceptual)
 
 | Endpoint                       | Purpose                                    | Security                  |
 |--------------------------------|--------------------------------------------|---------------------------|
 | POST /missions/draft-from-text | LLM drafts a mission from pasted text      | Organizer                 |
-| POST /missions                 | Create draft mission                       | Organizer scoped          |
+| POST /missions                 | Create draft mission                       | Organizer scoped or admin; criteria fields admin only |
 | POST /missions/:id/publish     | Publish validated mission                  | Organizer or admin        |
-| GET /missions/recommended      | Filtered, ranked missions with explanation | Signed-in student         |
-| POST /missions/:id/accept      | Accept; transactional capacity check       | Student                   |
+| GET /missions/recommended      | Filtered, ranked missions with explanation; only missions the student is eligible for | Signed-in student |
+| POST /missions/:id/accept      | Accept; transactional eligibility and capacity check; pending if dean approval is required | Student |
+| PUT /students/me/academic      | Set own school and CGPA; CGPA change audited | Student (own)           |
+| POST /assignments/:id/dean-decision | Record the dean's approval or rejection | Admin                   |
 | POST /completions/:id/review   | Approve or reject attendance               | Organizer or admin        |
 | POST /completions/:id/revoke   | Revoke an approval with a logged reason    | Admin                     |
 | GET /certificates/:id/download | Download PDF                               | Owner or authorized staff |
@@ -308,7 +335,7 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 
 ## 14. Demo Script (Acceptance Gate and 10-Minute Pitch Flow)
 
-Seed: eight synthetic students, one organizer, one administrator.
+Seed: eight synthetic students (mixed schools and CGPAs, including one with no CGPA), one organizer, one administrator.
 
 1.  (Minute 0 to 2) Problem and evidence: named users, survey or interview finding, measurable outcome. Presenter A.
 
@@ -316,9 +343,9 @@ Seed: eight synthetic students, one organizer, one administrator.
 
 3.  (Minute 3 to 4) Organizer pastes a messy announcement; the LLM drafts a mission; the organizer edits and publishes. Presenter C.
 
-4.  (Minute 4 to 5) Recommended students appear with Why recommended; a conflicting and an unqualified student are excluded; an organizer override is logged. Presenter B.
+4.  (Minute 4 to 5) Recommended students appear with Why recommended; a conflicting and an unqualified student are excluded; an organizer override is logged. A second mission, posted by the admin for one school with a minimum CGPA, is visible to an eligible student and hidden from an ineligible one. Presenter B.
 
-5.  (Minute 5 to 6) Four students accept; a fifth concurrent request cannot exceed capacity. Presenter C.
+5.  (Minute 5 to 6) Four students accept; a fifth concurrent request cannot exceed capacity. On the dean-approval mission, an accepting student shows as pending, and the admin records the dean's approval. Presenter C.
 
 6.  (Minute 6 to 7) Organizer approves one participation; the student sees the notification, the watering count rises once, the student's tree grows, and a certificate PDF with a unique serial downloads. Presenter A.
 
@@ -337,7 +364,7 @@ Roles (one person may hold several): team lead and backend, frontend and UX, AI 
 | When           | Deliverable                                                                                                                                                                                          |
 |----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Oct 27 (today) | Survey sent, organizer or management interview booked; repository, database, authentication, roles; seeded synthetic data and one canonical mission; AI usage log started                            |
-| Oct 28         | Mission create and publish, LLM intake, matching with fairness balancing, accept with capacity lock, verification, watering ledger, certificate PDF, consent screen, baseline comparison, core tests |
+| Oct 28         | Mission create and publish, LLM intake, matching with fairness balancing, accept with capacity lock, verification, watering ledger, certificate PDF, consent screen, baseline comparison, core tests; student school and CGPA, admin eligibility criteria, dean approval (FR-028 to FR-030) |
 | Oct 29 morning | Feature freeze; HTTPS deployment; fallback demo video; README, project summary, declaration form; evidence inserted                                                                                  |
 | Oct 29         | Submit and test access from a clean browser                                                                                                                                                          |
 | Nov 2          | Internal pitch rehearsal; Stretch items only if all MVP tests pass                                                                                                                                   |
@@ -364,7 +391,7 @@ If time runs short, cut Should-have items first, never the end-to-end journey.
 | Problem relevance and impact (20)     | Section 1, evidence plan           | Named user, survey or interview result, metrics            |
 | Technical execution (25)              | FR-001 to FR-011, tests, NFRs      | Full journey runs live; README and commit history          |
 | Innovation and use of AI (15)         | FR-007, FR-023, FR-024, section 10 | LLM intake and explainable fair matching vs baseline       |
-| Responsible AI, ethics, security (10) | Section 9, FR-025, BR-11, RBAC     | Consent screen, Why recommended, override log, idempotency |
+| Responsible AI, ethics, security (10) | Section 9, FR-025, BR-11, BR-15, RBAC | Consent screen, Why recommended, override log, idempotency, CGPA used only as an admin-set filter |
 | Feasibility and next steps (15)       | Section 16                         | Cost, pilot plan, risks                                    |
 | Pitch, demo, teamwork (15)            | Sections 14 and 15                 | Timed script, each member presents, fallback video         |
 

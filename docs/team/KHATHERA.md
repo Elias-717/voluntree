@@ -76,7 +76,7 @@ Check that Elias's Phase 0 work is on `main`: `package.json` with vitest and pdf
 
 Wait for `src/types/domain.ts` and use only its types.
 
-1. **Stage 1, filters.** Exclude students with a time conflict, missing required eligibility, a matching opt-out (FR-025), or a full mission. Each excluded student carries the reason.
+1. **Stage 1, filters.** Exclude students with a time conflict, missing required eligibility, a school not in `mission.eligibleSchools` (empty means all), a CGPA below `mission.minCgpa` or no CGPA when a minimum is set (FR-029, DEC-016), a matching opt-out (FR-025), or a full mission. Each excluded student carries the reason.
 2. **Stage 2, transparent weighted score.** Starting weights from SRS §10:
 
    | Factor | Weight |
@@ -90,9 +90,11 @@ Wait for `src/types/domain.ts` and use only its types.
    Omitted factors are re-normalized. Keep the weights as named constants in one place.
 3. **"Why recommended."** Every recommendation lists each factor and its contribution.
 4. **Determinism.** The same input always gives the same order, with a fixed tie-break.
-5. **Never use** grades, gender, nationality, religion or any other sensitive attribute (NFR-09).
+5. **Never use** grades, gender, nationality, religion or any other sensitive attribute in the score (NFR-09). CGPA is used only in the Stage 1 filter, never in Stage 2 (BR-15).
 6. Tests on fixed fixtures:
    - a conflicting student, an unqualified student and an opted-out student are excluded
+   - a student from a non-listed school, a student below the minimum CGPA and a student with no CGPA are excluded from a gated mission; a CGPA equal to the minimum is eligible
+   - raising an eligible student's CGPA does not change their score
    - a new student still appears in recommendations
    - the same input gives the same output
 
@@ -108,7 +110,8 @@ Wait for `src/types/domain.ts` and use only its types.
    - share of slots filled by skill-matched students
    - spread of opportunities (Gini and max–min gap)
    - time conflicts offered
-3. Report honestly, including cases where the baseline wins.
+   - for gated missions, spread within the eligible pool, and the share of missions that are gated (FR-026)
+3. Report honestly, including cases where the baseline wins. Synthetic students include a school and a CGPA (some with none).
 4. Ask Khathera how large the simulation should be (number of students and missions).
 5. Ask Elias, through Khathera, to add an npm script so the results can be reproduced with one command.
 
