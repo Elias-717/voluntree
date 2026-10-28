@@ -8,7 +8,7 @@ Assumptions note: AIU deployment, sponsorship, certificate branding and institut
 
 ## 1. Executive Summary
 
-Voluntree is a mobile-first web app (PWA) that helps AIU event organizers fill volunteer slots fairly and quickly, and gives students verified recognition for their service. An organizer pastes a messy event announcement; an AI model drafts a structured mission for the organizer to confirm. A transparent matching engine recommends students who fit the mission, explains why, and balances opportunities so the same few students are not always chosen. After the event, the organizer verifies attendance; the system adds exactly one watering to the student's tree and issues a PDF Certificate of Appreciation.
+Voluntree is a mobile-first web app (PWA) that helps AIU event organizers fill volunteer slots fairly and quickly, and gives students verified recognition for their service. An organizer pastes a messy event announcement; an AI model drafts a structured mission for the organizer to confirm. A transparent matching engine recommends students who fit the mission, explains why, and balances opportunities so the same few students are not always chosen. A school can also post, through the admin, opportunities restricted to its own students, a minimum CGPA, or dean approval; fairness balancing then applies among the eligible students, and opportunities without criteria stay open to everyone. After the event, the organizer verifies attendance; the system adds exactly one watering to the student's tree and issues a PDF Certificate of Appreciation.
 
 Primary innovation: explainable, fairness-aware matching with human control, plus LLM-assisted mission intake, delivered as one auditable workflow and evaluated against a first-come-first-served baseline. The growing tree is a visual record of each student's verified volunteering, not the technical core.
 
@@ -24,7 +24,7 @@ AIU campus events rely on student volunteers recruited through group chats, post
 |-----------------------------|-----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
 | Student volunteer (primary) | Find suitable opportunities fairly; get verified recognition          | Survey: how they find volunteering, whether opportunities feel fair, whether they get certificates |
 | Event organizer (primary)   | Fill slots with suitable people; verify attendance with little effort | Interview: current process, time spent, no-show experience                                         |
-| Administrator (secondary)   | See verified impact and audit actions                                 | Management interview or desk research                                                              |
+| Administrator (secondary)   | See verified impact and audit actions; post school opportunities with eligibility criteria; record dean approvals | Management interview or desk research                                                  |
 
 Community partners are removed from the MVP and listed as future work.
 
@@ -46,7 +46,7 @@ Goals:
 
 - G-03: Issue a PDF Certificate of Appreciation for every verified volunteer, with no duplicates.
 
-- G-04: Show responsible AI inside the product: consent, explanations, human override and no sensitive attributes.
+- G-04: Show responsible AI inside the product: consent, explanations, human override and no sensitive attributes. CGPA is used only as an admin-set eligibility filter, never for ranking.
 
 - G-05: Report measurable results, not assumed ones.
 
@@ -56,19 +56,19 @@ Non-goals for the MVP: app-store distribution, payments, real vouchers or trips,
 
 | Role      | Responsibilities                                                       | Key permissions                            |
 |-----------|------------------------------------------------------------------------|--------------------------------------------|
-| Student   | Browse and accept missions, receive notifications and certificates     | Own profile, assignments, certificates     |
-| Organizer | Create and publish missions, review recommendations, verify attendance | Own organization's missions and applicants |
-| Admin     | Oversight, audit, overrides                                            | Cross-mission read and audited overrides   |
+| Student   | Declare school and optional CGPA, browse and accept missions they are eligible for, receive notifications and certificates | Own profile, assignments, certificates |
+| Organizer | Create and publish missions (open to all), review recommendations, verify attendance | Own organization's missions and applicants; sees whether a student meets criteria, never their CGPA |
+| Admin     | Oversight, audit, overrides; create missions with eligibility criteria (schools, minimum CGPA, dean approval); record dean decisions on the dean's behalf | Cross-mission read and audited overrides; only staff role that sees CGPA |
 
 ## 5. Core User Journey (the demo)
 
-1.  Student logs in with a demo account and sees a plain-language consent and privacy screen with an option to opt out of matching.
+1.  Student logs in with a demo account (school and optional CGPA declared at registration) and sees a plain-language consent and privacy screen with an option to opt out of matching.
 
-2.  Organizer pastes an event announcement. The LLM drafts a structured mission; the organizer edits and publishes. The draft is labeled AI-generated and nothing is published automatically.
+2.  Organizer pastes an event announcement. The LLM drafts a structured mission; the organizer edits and publishes. The draft is labeled AI-generated and nothing is published automatically. The admin can also post a school opportunity with eligible schools, a minimum CGPA and a dean-approval flag; students who do not meet the criteria never see it.
 
-3.  The matching engine removes students with time conflicts or missing eligibility, then ranks the rest with a transparent score that includes an opportunity-balance factor. Each recommendation shows Why recommended.
+3.  The matching engine removes students with time conflicts or missing eligibility (including school and minimum CGPA), then ranks the rest with a transparent score that includes an opportunity-balance factor. Each recommendation shows Why recommended.
 
-4.  Students accept voluntarily. Capacity is enforced even for simultaneous requests.
+4.  Students accept voluntarily. Capacity is enforced even for simultaneous requests. If the mission requires dean approval, the acceptance is pending and holds a slot until the admin records the dean's decision.
 
 5.  After the event, the organizer approves attendance. One watering is recorded exactly once and a PDF certificate with a unique ID is generated. The student sees the update on screen, including their tree growing.
 
@@ -78,7 +78,8 @@ Non-goals for the MVP: app-store distribution, payments, real vouchers or trips,
 
 | Capability                 | MVP (must work live by Oct 29)                                                                                    | Stretch (before Nov 2 or Nov 5 if selected)                  | Future (label as future work)                                  |
 |----------------------------|-------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|----------------------------------------------------------------|
-| Identity and roles         | Demo login, student, organizer and admin roles, server-side checks                                                | Profile editing                                              | AIU single sign-on                                             |
+| Identity and roles         | Demo login, student, organizer and admin roles, server-side checks; school and optional CGPA at registration, both editable with audit | Profile editing                         | AIU single sign-on                                             |
+| Eligibility and dean approval | Admin-set eligible schools and minimum CGPA, missions hidden from ineligible students, optional dean approval recorded by the admin, pending holds a slot | None                         | None                                                           |
 | Mission flow               | Create, publish, accept, verify, complete                                                                         | Withdrawal cutoff, full lifecycle states                     | Recurring schedules                                            |
 | AI: matching               | Hard filters, transparent score, Why recommended, exposure balancing, cold-start rule                             | Organizer override log in the UI                             | Learned models, evaluated fairness at scale                    |
 | AI: mission intake         | LLM draft with mandatory human review                                                                             | Dedupe and validation hints                                  | Multilingual intake                                            |
@@ -94,7 +95,7 @@ Rule: if time runs out, cut stretch items first. Never cut the end-to-end journe
 
 ## 7. Critical Product Policies
 
-- Every verified volunteer receives one Certificate of Appreciation per qualifying mission, regardless of watering count or rank.
+- Every verified volunteer receives one Certificate of Appreciation per qualifying mission, regardless of watering count or rank. If the approval is revoked, the certificate is kept but marked revoked and can no longer be downloaded; a later re-approval reactivates the same certificate.
 
 - Waterings are lifetime, non-transferable and never spent.
 
@@ -110,6 +111,10 @@ Rule: if time runs out, cut stretch items first. Never cut the end-to-end journe
 
 - The tree never penalizes inactivity. It shrinks only when an admin revokes a mistaken or fraudulent approval, with a logged reason.
 
+- Only admins set eligibility criteria. Opportunities without criteria are open to every student. CGPA is self-declared, used only as an eligibility threshold, never for ranking, and visible only to the student and admins. Eligibility is checked when a student accepts; later changes do not remove them, and criteria are locked once anyone has accepted.
+
+- When a mission requires dean approval, a student is confirmed only after the admin records the dean's approval. A pending request holds a slot; a rejection frees it.
+
 ## 8. Responsible AI, Privacy and Security
 
 - Law and policy: follow the Personal Data Protection Act 2010 (Malaysia) and the AIU code of conduct.
@@ -118,7 +123,7 @@ Rule: if time runs out, cut stretch items first. Never cut the end-to-end journe
 
 - Consent: plain-language consent screen with opt-out, consent version stored per user.
 
-- Minimization and bias: the matcher uses only declared skills, declared availability, schedule conflicts and optional coarse distance. It never uses grades, gender, nationality, religion or other sensitive traits. Exposure balancing and a cold-start rule protect newcomers.
+- Minimization and bias: the matching score uses only declared skills, declared availability, schedule conflicts and optional coarse distance. It never uses grades, gender, nationality, religion or other sensitive traits. The only use of grades is an admin-set minimum CGPA, applied as a hard eligibility filter before ranking. Exposure balancing and a cold-start rule protect newcomers and apply within the eligible pool.
 
 - Explainability: every recommendation lists the factors that produced it.
 
@@ -144,6 +149,8 @@ Rule: if time runs out, cut stretch items first. Never cut the end-to-end journe
 | End-to-end completion across scripted demo cases          | 100%                                                      |
 | Duplicate watering or certificate after repeated approval | 0                                                         |
 | Mandatory eligibility respected in recommendations        | 100%                                                      |
+| Gated missions shown to or accepted by ineligible students | 0                                                        |
+| Capacity respected, counting pending dean approvals       | 100%                                                      |
 | Certificate data matches the approved record              | All tested certificates valid                             |
 | Screen update after approval                              | Within 5 seconds on a test network, with refresh fallback |
 
@@ -154,7 +161,7 @@ Report the baseline comparison honestly, including any case where the baseline p
 | When                       | Work                                                                                                                                                                                                                                                            | Owner      |
 |----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
 | Oct 27 (today)             | Send survey and book an organizer or management interview. Set up repository, database, authentication, roles. Seed 8 or more synthetic students, one organizer, one admin, one canonical event mission. Start the AI usage log.                                | \[Assign\] |
-| Oct 28                     | Mission create and publish, LLM intake, matching with explanation and exposure balancing, accept with capacity lock, verification, watering ledger, certificate PDF, consent screen, baseline comparison. Tests for matching filters, idempotency and capacity. | \[Assign\] |
+| Oct 28                     | Mission create and publish, LLM intake, matching with explanation and exposure balancing, accept with capacity lock, verification, watering ledger, certificate PDF, consent screen, baseline comparison, student school and CGPA, admin eligibility criteria, dean approval. Tests for matching filters, eligibility, idempotency and capacity. | \[Assign\] |
 | Oct 29 morning             | Freeze features. Deploy over HTTPS with demo accounts. Record a fallback demo video. Write README, project summary and declaration form. Insert survey or interview evidence.                                                                                   | \[Assign\] |
 | Oct 29                     | Submit project, project summary and declaration form. Verify access links work from a clean browser.                                                                                                                                                            | \[Assign\] |
 | Nov 2 (internal pitch)     | Rehearse the 10-minute pitch with every member speaking. Add stretch items only if all MVP tests pass.                                                                                                                                                          | \[Assign\] |
@@ -169,7 +176,8 @@ Verify these dates with the organizers when they are announced. The competition 
 | Only 2 days to build             | Build only the single journey. Cut stretch items. Use Supabase or a similar hosted backend for authentication and database, and a PDF library rather than custom code. |
 | Problem not validated at AIU     | Run the evidence ladder in section 2.3 and label any gap openly.                                                                                                       |
 | LLM errors or invented details   | Human review is mandatory; blank unknown fields; log model and prompt. Provide a manual form as fallback.                                                              |
-| Algorithmic exclusion            | Explanations, opt-out, exposure balancing, cold-start rule, human override.                                                                                            |
+| Algorithmic exclusion            | Explanations, opt-out, exposure balancing, cold-start rule, human override. CGPA gates are set by a human per mission, never by the AI; open-to-all missions remain the default. |
+| False self-declared CGPA         | Every CGPA change is audited with the old value; dean approval is the human check where a school requires it.                                                          |
 | Demo failure on the day          | Fallback video and resettable synthetic accounts.                                                                                                                      |
 | Sensitive data                   | Synthetic accounts only; written consent for anything real.                                                                                                            |
 | Inaccurate certificate authority | Prototype watermark unless AIU authorizes a template.                                                                                                                  |
@@ -192,6 +200,8 @@ Verify these dates with the organizers when they are announced. The competition 
 - Who may publish official missions and approve completion at AIU?
 
 - Who may issue certificates?
+
+- Which schools may restrict opportunities by CGPA, and how is a declared CGPA confirmed?
 
 - Which student identifiers may be used?
 

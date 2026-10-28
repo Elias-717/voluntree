@@ -86,9 +86,15 @@ Voluntree helps AIU fill event volunteer slots fairly. AI drafts missions from a
 - One organizer-approved participation adds one watering, recorded exactly once in the append-only WateringLedger.
 - Tree stages are seed 0, sprout 3, sapling 6, young tree 9 and full tree 12. The step of 3 is configurable. The tree stays full after 12.
 - No hours anywhere. Organizers approve attendance only, and certificates show name, mission, date and ID.
-- An admin may revoke an approval with a logged reason. This is the only case where a tree shrinks.
+- An admin may revoke an approval with a logged reason. This is the only case where a tree shrinks. The certificate is then marked revoked and can't be downloaded; re-approval reactivates the same certificate (FR-010).
+- Demo seed: students have varied past participation, seeded as real completed missions; the demo student starts at 2 waterings so the tree grows to sprout in demo step 6.
 - A student's tree is visible only to that student (BR-13).
 - AI is advisory. The LLM drafts missions only. Overrides need a logged reason (BR-11).
+- Students declare their school (SBSS, SEHS, SCI, CFGS or LC) and an optional CGPA at registration. School and CGPA are editable any time (e.g. moving from CFGS or LC into a degree school), every change is audited, and only the student and admins see it (FR-028).
+- Only admins set eligibility criteria on a mission: eligible schools, a minimum CGPA, and dean approval. Missions without criteria are open to all. Ineligible students never see a gated mission (FR-029, BR-14).
+- CGPA is a hard eligibility filter only, never a score factor. Fairness balancing applies within the eligible pool (BR-15).
+- Dean approval gates each student's participation. A pending request holds a slot; the admin records the dean's decision with an optional note. There is no dean role (FR-030, BR-16).
+- Eligibility is checked only at acceptance. Later school or CGPA changes keep existing assignments; criteria are locked once any student has accepted (FR-029, BR-14).
 
 ## 4. Stack
 
@@ -113,11 +119,11 @@ Finish each phase's exit check before starting the next. If time runs out, cut s
 | Phase | Scope | IDs | Exit check |
 |---|---|---|---|
 | 0. Setup | Scaffold Next.js; install all known dependencies; vitest config; `src/types/domain.ts`; link Supabase and Vercel; env vars; empty files in `docs/ai-usage/` | NFR-10 | Blank app deployed on an HTTPS Vercel URL; `domain.ts` on `main` |
-| 1. Data foundation | Tables from SRS §7 as amended by the log; RLS; functions `accept_mission`, `approve_completion`, `revoke_completion`; seed of 8 students, 1 organizer and 1 admin | FR-001, FR-002, FR-006, FR-008, FR-009, BR-01–BR-13 | DB tests pass: capacity never exceeded under concurrency, double approval gives one watering and one certificate, revocation without a reason is rejected |
-| 2. Core journey, no AI | Screen list agreed with the owner first. Then: manual mission form, publish, accept, approve attendance, tree, PDF certificate, polling updates, consent screen | FR-004, FR-005, FR-006, FR-008, FR-010, FR-011, FR-025, FR-027 | The whole journey works by hand on the deployed URL |
-| 3. Matching and fairness | Hard filters, transparent score, exposure balancing, cold-start rule, "Why recommended", override with a logged reason | FR-007, FR-024, BR-11 | Seeded fixtures give deterministic rankings; conflicting and unqualified students are excluded |
+| 1. Data foundation | Tables from SRS §7 as amended by the log, including student school and CGPA, mission eligibility criteria and dean-decision fields; RLS (CGPA readable by the student and admins only); functions `accept_mission` (eligibility check, pending state when dean approval is required), `approve_completion`, `revoke_completion`, `record_dean_decision`; seed of 8 students (mixed schools and CGPAs, one with none; varied past participation as real completed missions, demo student at 2 waterings), 1 organizer and 1 admin | FR-001, FR-002, FR-006, FR-008, FR-009, FR-028–FR-030, BR-01–BR-16 | DB tests pass: capacity never exceeded under concurrency (pending dean approvals count), double approval gives one watering and one certificate, revocation without a reason is rejected, ineligible acceptance rejected, organizer cannot set criteria or read CGPA, dean rejection frees the slot, criteria edit after the first acceptance rejected, revoked certificate download rejected, re-approval reactivates the same certificate |
+| 2. Core journey, no AI | Screen list agreed with the owner first. Then: school and CGPA at registration, manual mission form (admin version with eligibility criteria), publish, accept, admin dean-approval queue, approve attendance, tree, PDF certificate, polling updates, consent screen | FR-004, FR-005, FR-006, FR-008, FR-010, FR-011, FR-025, FR-027, FR-028–FR-030 | The whole journey works by hand on the deployed URL, including one gated mission with dean approval |
+| 3. Matching and fairness | Hard filters (including school and minimum CGPA), transparent score, exposure balancing, cold-start rule, "Why recommended", override with a logged reason | FR-007, FR-024, FR-029, BR-11, BR-15 | Seeded fixtures give deterministic rankings; conflicting, unqualified and ineligible students are excluded; CGPA does not change any score |
 | 4. LLM intake | Gemini server route, schema validation, AI-generated label, blanks flagged, AiUsageLog, manual form as fallback | FR-023 | Paste, draft, edit, publish works; nothing is published automatically |
-| 5. Evaluation | Baseline script comparing against first-come-first-served on seeded data; trade-offs reported honestly | FR-026 | Results reproducible from the README |
+| 5. Evaluation | Baseline script comparing against first-come-first-served on seeded data; spread within eligible pools and share of gated missions; trade-offs reported honestly | FR-026 | Results reproducible from the README |
 | 6. Ship | Final deploy, README, fallback video, AI usage log complete, declaration form, evidence inserted | NFR-10 | Submission checklist in SRS §17 complete |
 | 7. Stretch | Only after every Must passes. The owner picks the items | FR-003, FR-012, FR-014–FR-016 | Owner's call |
 
@@ -127,23 +133,24 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 
 1. Team: Elias and Khathera so far. Are more members joining, and does everyone meet the final-year eligibility rule (SRS §15)?
 2. Official competition dates.
-3. What happens to a certificate when its approval is revoked.
-4. Demo seed: should one student start at 2 waterings so the tree visibly grows in demo step 6?
+3. Resolved (DEC-021): a revoked approval marks its certificate revoked.
+4. Resolved (DEC-021): varied seeded history; the demo student starts at 2 waterings.
 5. How real students enter skills and availability. FR-007 is a Must but needs them, while FR-003 Student Profile is only a Should.
 6. Override UI: BR-11 and demo step 4 need it, but the PRD lists the override log UI as Stretch.
 7. Demo step 6 mentions a notification, but FR-012 In-App Notifications is only a Should.
 8. Gemini data handling: strip personal details before sending? Which tier and terms?
 9. Is the organizer a primary or a secondary user? The SRS and PRD disagree.
 10. The SRS header says "2-week build", while the plan says 2 days.
+11. Resolved (DEC-022): students can change their school any time, audited like CGPA.
 
 ## 7. Current status
 
 Update this section after every completed task.
 
-- **Phase:** 0, in progress
-- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-014); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
-- **Next:** Elias: merge the Phase 0 PR, import the repo in Vercel, set env vars, confirm the HTTPS URL. Then Task 1 (Phase 1 data foundation). Khathera: Task 1 (tree SVGs) once she joins
-- **Blockers:** Phase 0 exit check needs the Vercel deploy (Elias, dashboard)
+- **Phase:** 0 complete; Phase 1 not started
+- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-022; DEC-015 to DEC-020 add student school and CGPA, admin eligibility criteria and dean approval after the advisor meeting); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
+- **Next:** Elias: Task 1 (Phase 1 data foundation, now including FR-028 to FR-030). Khathera: Task 1 (tree SVGs); Task 3 matching now includes the school and CGPA filters
+- **Blockers:** none
 
 <!-- BEGIN:nextjs-agent-rules -->
 
