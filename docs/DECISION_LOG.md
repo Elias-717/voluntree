@@ -316,3 +316,11 @@ Rules:
 - Reason: Khathera's Task 3 review: removes the ambiguity between skills and eligibility; never recommends a student whom accept_mission would refuse; keeps matching consistent with the Phase 1 schema and functions; recommends only students who can attend the whole mission without hiding new students who have not entered availability (DB default '[]', open question 5); once availability is a filter it cannot distinguish ranked students, so its weight is redistributed proportionally to keep the other factors' relative importance. All-time opportunities is the simplest look-back rule to explain. Proposed by Khathera as DEC-034; renumbered because DEC-034 and DEC-035 were already used by visual design entries.
 - Decided by: Khathera (matching module), confirmed by Elias
 - Supersedes: SRS §10 starting weights (availability fit 30%)
+
+### DEC-037 — Next-stage watering gauge
+- Date: 2026-10-28
+- Change: DEC-035's 12-segment whole-journey gauge → a next-stage gauge: one arc segment per watering needed for the next stage (WATERINGS_PER_STAGE, currently 3), filled up to the waterings earned within the current stage; it refills at each stage, and at 12 or more waterings it shows "Full tree" with every segment filled. The current tree stage art sits large inside the arc (Khathera's SVG, unchanged, cropped to its content so small stages such as the seed stay clearly visible), with "N of 3" and "waterings · M more to <next stage>" below. Demo state before step 6: Farid, 2 of 3, seed.
+- Affects: Figma Screens page "Sample — Student Home" (light and dark); student home build in Phase 2; FR-027 presentation only (stage rule unchanged).
+- Reason: Elias found 12 segments unclear; a gauge that matches exactly the waterings needed next is easier to read.
+- Decided by: Elias
+- Supersedes: DEC-035 item (1) only
