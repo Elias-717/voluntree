@@ -1,12 +1,15 @@
 "use client";
 
-// Screens 10 and 12: the manual mission form (FR-004). Admins also see eligibility criteria
+// Screens 10 and 12: the mission form (FR-004). Admins also see eligibility criteria
 // (FR-029); organizers are told only admins can set them. Save draft or publish.
+// A new mission can start from an AI draft of a pasted announcement (FR-023); the person still
+// checks and edits every field, and nothing is published automatically.
 
-import { useActionState } from "react";
-import { Check } from "@phosphor-icons/react";
+import { useActionState, useState } from "react";
+import { Check, Sparkle } from "@phosphor-icons/react";
 import type { School } from "@/types/domain";
 import { saveMission } from "@/lib/actions/staff";
+import { IntakePanel } from "./intake-panel";
 
 const SCHOOLS: School[] = ["SBSS", "SEHS", "SCI", "CFGS", "LC"];
 
@@ -35,13 +38,39 @@ interface Props {
 
 const input = "w-full rounded-[12px] border border-line bg-page px-3 py-2.5";
 
-export function MissionForm({ admin, draft = {}, organizations = [], criteriaLocked = false }: Props) {
+export function MissionForm({ admin, draft: saved = {}, organizations = [], criteriaLocked = false }: Props) {
   const [error, formAction, pending] = useActionState(saveMission, null);
+  // An AI draft replaces the starting values; the key remounts the inputs with them.
+  const [draft, setDraft] = useState<MissionDraft>(saved);
+  const [ai, setAi] = useState<{ blanks: string[]; version: number } | null>(null);
 
   return (
-    <form action={formAction} className="grid gap-6 lg:grid-cols-[1fr_260px]">
+    <form key={ai?.version ?? 0} action={formAction} className="grid gap-6 lg:grid-cols-[1fr_260px]">
       {draft.id && <input type="hidden" name="id" value={draft.id} />}
+      {ai && <input type="hidden" name="source" value="ai_draft" />}
       <div className="flex flex-col gap-4 rounded-[22px] border border-line bg-card p-5">
+        {!draft.id && (
+          <IntakePanel
+            onDraft={(d, blanks) => {
+              setDraft({
+                ...draft,
+                title: d.title ?? "", description: d.description ?? "", place: d.place ?? "",
+                skills: d.skills.join(", "), date: d.date ?? "", start: d.start ?? "", end: d.end ?? "",
+                capacity: d.capacity,
+              });
+              setAi({ blanks, version: (ai?.version ?? 0) + 1 });
+            }}
+          />
+        )}
+        {ai && (
+          <p className="flex items-start gap-2 rounded-[14px] bg-brown-tint p-3 text-sm text-brown">
+            <Sparkle size={18} weight="fill" aria-hidden className="mt-0.5 shrink-0" />
+            <span>
+              <strong>AI-generated draft.</strong> Check every field before publishing.
+              {ai.blanks.length > 0 && ` Not in the announcement, so left blank: ${ai.blanks.join(", ")}.`}
+            </span>
+          </p>
+        )}
         {admin && !draft.id && organizations.length > 0 && (
           <Field label="Organization">
             <select name="organization" defaultValue={organizations[0].id} className={input}>

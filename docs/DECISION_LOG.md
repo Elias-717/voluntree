@@ -388,3 +388,11 @@ Rules:
 - Reason: Fairness-first, reproducible comparison using the unchanged DEC-036 engine.
 - Decided by: Khathera (evaluation module), confirmed by Elias
 - Supersedes: none
+
+### DEC-046 — LLM intake: model, usage log and redaction
+- Date: 2026-10-29
+- Change: (1) FR-023 is built in `src/lib/intake/draft.ts`: the organizer or admin pastes an announcement, Gemini returns JSON that is validated with a Zod schema, missing fields come back blank and are listed as flagged, the form shows an "AI-generated draft" label, the mission is saved with source `ai_draft`, and nothing is published automatically; any AI failure falls back to the manual form. (2) Model: `gemini-2.5-flash` was chosen, but Google no longer offers it to new users; the replacement model is to be confirmed by Elias once billing is enabled. (3) New append-only table `ai_usage_log` (SRS §7 AiUsageLog: feature, model, version, prompt hash, actor, success, time), written by staff for their own calls and readable by admins only; the prompt text itself is not stored. (4) Open question 8 resolved: email addresses and phone numbers are replaced with [email] and [phone] before the text is sent to Gemini.
+- Affects: SRS FR-023, §7 data model, AGENTS.md §6 Q8; `supabase/migrations/20261029090000_ai_usage_log.sql` (applied to the live project); mission form.
+- Reason: Approved by Elias; keeps the human in the loop, records every AI call for the declaration form, and sends as little personal data as possible.
+- Decided by: Elias
+- Supersedes: none
