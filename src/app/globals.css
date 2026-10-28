@@ -98,10 +98,17 @@
   --color-gauge-empty: var(--gauge-empty);
   --color-gauge-filled: var(--gauge-filled);
   --font-sans: var(--font-dm-sans);
+  --font-display: var(--font-fraunces), Georgia, serif;
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 22px;
   --radius-xl: 28px;
+}
+
+/* Landing live demo: the tree pops in when it reaches a new stage. */
+@keyframes grow {
+  from { transform: scale(0.85); opacity: 0.4; }
+  to { transform: none; opacity: 1; }
 }
 
 body {
