@@ -1,5 +1,6 @@
 // Screen 12: admin mission form with eligibility criteria (FR-029). Criteria lock after the first acceptance.
 
+import { CancelButton } from "@/components/cancel-button";
 import { MissionForm } from "@/components/mission-form";
 import { loadDraft } from "@/lib/db/mission-draft";
 import { createClient } from "@/lib/db/server";
@@ -22,7 +23,10 @@ export default async function AdminNewMission({ searchParams }: PageProps<"/admi
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-[-0.03em]">{draft ? "Edit draft" : "New mission"}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">{draft ? "Edit draft" : "New mission"}</h1>
+        {draft?.id && <CancelButton missionId={draft.id} draft />}
+      </div>
       <p className="mb-6 text-sm text-muted">Criteria lock once a student accepts.</p>
       <MissionForm admin draft={draft} organizations={active.map(({ id: orgId, name }) => ({ id: orgId, name }))} criteriaLocked={locked} />
     </>

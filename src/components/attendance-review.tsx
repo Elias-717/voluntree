@@ -6,6 +6,7 @@ import { Check, GraduationCap, Hourglass, Phone, X } from "@phosphor-icons/react
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDayTime, formatTime } from "@/lib/format";
 import { MISSION_COLUMNS, type MissionRow } from "@/lib/db/student";
+import { CancelButton } from "./cancel-button";
 import { ReviewButtons, RevokeButton } from "./review-buttons";
 
 type RosterRow = {
@@ -39,7 +40,11 @@ export async function AttendanceReview({ supabase, missionId, admin }: { supabas
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-[-0.03em]">{m.title}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">{m.title}</h1>
+        {m.status === "PUBLISHED" && <CancelButton missionId={m.id} draft={false} />}
+      </div>
+      {m.status === "CANCELLED" && <p className="mt-2 text-sm font-medium text-brown">This mission was cancelled.</p>}
       <p className="text-sm text-muted">
         {formatDayTime(m.starts_at)} to {formatTime(m.ends_at)} · {m.place} · {held} of {m.capacity} accepted
       </p>

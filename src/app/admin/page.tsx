@@ -24,6 +24,7 @@ const ACTIONS: Record<string, string> = {
   criteria_changed: "set eligibility criteria",
   consent_recorded: "updated matching consent",
   academic_changed: "changed school or CGPA",
+  cancelled: "cancelled a mission",
 };
 
 export default async function AdminOverview() {

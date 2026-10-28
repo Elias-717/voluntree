@@ -10,7 +10,7 @@ import { formatDay, formatDayTime } from "@/lib/format";
 type Row = {
   id: string;
   status: "PENDING_DEAN_APPROVAL" | "ACCEPTED" | "DEAN_REJECTED";
-  missions: { id: string; title: string; starts_at: string; ends_at: string };
+  missions: { id: string; title: string; starts_at: string; ends_at: string; status: string };
   completions: { status: "APPROVED" | "REJECTED" | "REVOKED" } | { status: "APPROVED" | "REJECTED" | "REVOKED" }[] | null;
 };
 
@@ -21,6 +21,7 @@ const BADGES = {
   watered: { text: "+1 watering", Icon: Drop, brown: false },
   notConfirmed: { text: "Attendance not confirmed", Icon: X, brown: true },
   revoked: { text: "Approval revoked", Icon: X, brown: true },
+  cancelled: { text: "Mission cancelled", Icon: X, brown: true },
   deanNo: { text: "Dean said no", Icon: X, brown: true },
 } as const;
 
@@ -31,7 +32,7 @@ export default async function MyMissions({ searchParams }: PageProps<"/student/m
   const supabase = await createClient();
   const { data } = await supabase
     .from("mission_assignments")
-    .select("id, status, missions(id, title, starts_at, ends_at), completions(status)")
+    .select("id, status, missions(id, title, starts_at, ends_at, status), completions(status)")
     .eq("student_id", me.id);
 
   const now = new Date().toISOString();
@@ -39,13 +40,14 @@ export default async function MyMissions({ searchParams }: PageProps<"/student/m
     const completion = Array.isArray(a.completions) ? a.completions[0] : a.completions;
     const ended = a.missions.ends_at <= now;
     let badge: keyof typeof BADGES;
-    if (a.status === "DEAN_REJECTED") badge = "deanNo";
+    if (a.missions.status === "CANCELLED") badge = "cancelled";
+    else if (a.status === "DEAN_REJECTED") badge = "deanNo";
     else if (completion?.status === "APPROVED") badge = "watered";
     else if (completion?.status === "REVOKED") badge = "revoked";
     else if (completion?.status === "REJECTED") badge = "notConfirmed";
     else if (a.status === "PENDING_DEAN_APPROVAL") badge = "dean";
     else badge = ended ? "checking" : "in";
-    const finished = badge === "watered" || badge === "revoked" || badge === "notConfirmed" || badge === "deanNo";
+    const finished = ["watered", "revoked", "notConfirmed", "deanNo", "cancelled"].includes(badge);
     return { ...a, badge, finished };
   });
 
