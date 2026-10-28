@@ -372,3 +372,11 @@ Rules:
 - Reason: Approved by Elias; the Phase 1 schema could not save consent, show spots left to students, or share phone numbers on assigned missions only.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-044 — Test data hidden from the demo instead of deleted
+- Date: 2026-10-29
+- Change: Phase 1 test runs left about 45 published test missions and 8 "Test" logins in the live project. They cannot be deleted, because their watering ledger and audit rows are append-only (NFR-07). Instead, the test organization's missions were set to CANCELLED and the test logins marked deactivated, and `supabase/tests/phase1.test.ts` now does the same after every run. Demo screens show only PUBLISHED missions, so students and matching never see test missions.
+- Affects: live Supabase data, `supabase/tests/phase1.test.ts`; Phase 2 screens leave out deactivated users.
+- Reason: Approved by Elias; the demo must show only the seeded demo missions and people.
+- Decided by: Elias
+- Supersedes: none

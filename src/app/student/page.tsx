@@ -1,14 +1,14 @@
 // Student home. Placeholder until its Phase 2 slice is built.
 
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { requireRole } from "@/lib/db/session";
 import { signOut } from "../sign-in/actions";
 
-// Signed-in pages read the session cookie, so they render per request.
-export const instant = false;
-
 export default async function StudentHome() {
   const me = await requireRole("student");
+  // First visit, or the notice changed: onboarding comes first (FR-025).
+  if (!me.consentVersion) redirect("/student/welcome");
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 py-6">
       <Logo href="/student" />
