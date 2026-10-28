@@ -4,10 +4,12 @@
 // They use their own logins and a separate test organization, never the demo data.
 // The ledger and audit tables are append-only, so test rows stay; every mission gets
 // its own far-future time slot and the tests compare counts before and after.
+// After each run the test missions are cancelled and the test logins deactivated, so they
+// never appear in the demo (DEC-044).
 
 import { randomBytes, randomInt } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 try {
   process.loadEnvFile(".env.local");
@@ -42,6 +44,7 @@ const as = {} as Record<Person, SupabaseClient>;
 
 // Each run starts at a random hour between 2030 and about 2090; missions in a run follow on.
 let nextSlot = Date.UTC(2030, 0, 1) + randomInt(0, 500_000) * 3_600_000;
+const createdMissions: string[] = [];
 
 async function createMission(fields: Record<string, unknown> = {}): Promise<string> {
   const start = nextSlot;
@@ -63,6 +66,7 @@ async function createMission(fields: Record<string, unknown> = {}): Promise<stri
     .select("id")
     .single();
   if (error) throw error;
+  createdMissions.push(data.id);
   return data.id;
 }
 
@@ -122,6 +126,15 @@ describe.skipIf(!hasDatabase)("Phase 1 database", () => {
       if (error) throw error;
       as[name] = client;
     }
+  }, TIMEOUT);
+
+  afterAll(async () => {
+    if (!service) return;
+    if (createdMissions.length > 0) {
+      await service.from("missions").update({ status: "CANCELLED" }).in("id", createdMissions);
+    }
+    const ids = Object.values(people).map((p) => p.id);
+    await service.from("profiles").update({ deactivated_at: new Date().toISOString() }).in("id", ids);
   }, TIMEOUT);
 
   it("never exceeds capacity under concurrent accepts (FR-006)", async () => {
