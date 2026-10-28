@@ -180,3 +180,11 @@ Rules:
 - Reason: Keep the plan in line with the new requirements.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-020 — Eligibility checked at acceptance; dean note optional; CGPA range confirmed
+- Date: 2026-10-28
+- Change: (1) Open question on CGPA or criteria changing after acceptance → eligibility is checked only when a student accepts; later CGPA changes keep existing assignments; an admin cannot change a mission's criteria once any student has accepted it. (2) Dean decision → recorded with an optional note; MissionAssignment gains dean_note. (3) CGPA range 0.00 to 4.00 confirmed. AGENTS.md open questions 11 to 13 resolved; new question 11 on school edits.
+- Affects: SRS FR-029, FR-030, BR-14, §7 MissionAssignment, §12. PRD §7. `AGENTS.md` §3, §5 Phase 1 exit check, §6, §7.
+- Reason: Lowest-risk option for the Oct 29 build; adds no new assignment state. Gaming via CGPA edits is visible in the audit log and caught by dean approval where required.
+- Decided by: Elias
+- Supersedes: none

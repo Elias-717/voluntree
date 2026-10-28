@@ -136,11 +136,11 @@ On registration each student shall declare their school (SBSS, SEHS, SCI, CFGS o
 
 #### FR-029 \[M\] Mission Eligibility Criteria
 
-From the admin dashboard, an admin may set on any mission: eligible schools (one or more; none means all schools), a minimum CGPA (none means no threshold), and whether dean approval is required (FR-030). Organizers cannot set criteria; their missions are open to all students. A student is eligible when their school is in the list (or the list is empty) and, if a minimum CGPA is set, their declared CGPA is at least that value. A student with no declared CGPA is not eligible for a CGPA-gated mission. Missions a student is not eligible for are hidden from that student in browsing and recommendations, and the server rejects their acceptance. Acceptance: an organizer request to set criteria returns forbidden; a mission with no criteria is shown to every student; a CGPA equal to the minimum is eligible; an ineligible student's direct accept request returns forbidden.
+From the admin dashboard, an admin may set on any mission: eligible schools (one or more; none means all schools), a minimum CGPA (none means no threshold), and whether dean approval is required (FR-030). Organizers cannot set criteria; their missions are open to all students. A student is eligible when their school is in the list (or the list is empty) and, if a minimum CGPA is set, their declared CGPA is at least that value. A student with no declared CGPA is not eligible for a CGPA-gated mission. Missions a student is not eligible for are hidden from that student in browsing and recommendations, and the server rejects their acceptance. Eligibility is checked only when a student accepts: later CGPA changes do not affect existing assignments, and an admin cannot change a mission's criteria once any student has accepted it. Acceptance: an organizer request to set criteria returns forbidden; a mission with no criteria is shown to every student; a CGPA equal to the minimum is eligible; an ineligible student's direct accept request returns forbidden; a criteria change after the first acceptance is rejected; a student who lowers their CGPA after accepting keeps the assignment.
 
 #### FR-030 \[M\] Dean Approval of Participation
 
-When a mission requires dean approval, a student's acceptance enters PENDING_DEAN_APPROVAL and holds a slot. An admin records the dean's decision on the dean's behalf: approval moves the assignment to ACCEPTED; rejection moves it to DEAN_REJECTED and frees the slot. Each decision records actor and timestamp. Acceptance: pending requests count toward capacity; a rejection frees the slot; the student sees the pending, approved or rejected status; only an admin can record the decision; a student who is not ACCEPTED cannot receive a watering or certificate.
+When a mission requires dean approval, a student's acceptance enters PENDING_DEAN_APPROVAL and holds a slot. An admin records the dean's decision on the dean's behalf, with an optional note: approval moves the assignment to ACCEPTED; rejection moves it to DEAN_REJECTED and frees the slot. Each decision records actor and timestamp. Acceptance: pending requests count toward capacity; a rejection frees the slot; the student sees the pending, approved or rejected status; only an admin can record the decision; a student who is not ACCEPTED cannot receive a watering or certificate.
 
 ### 5.2 AI and responsible-AI features (Must-have)
 
@@ -209,7 +209,7 @@ Expiring one-use QR or check-in nonce; replay rejected; doubtful events flagged 
 | BR-11   | AI recommendations are advisory; the student and organizer decide. Overrides require a logged reason.                                                                         |
 | BR-12   | Only admin-approved templates may represent AIU as certificate issuer. For the demo, certificates are labeled as a prototype and not an official AIU document.                |
 | BR-13   | A student's tree is visible only to that student.                                                                                                                             |
-| BR-14   | Eligibility criteria (eligible schools, minimum CGPA, dean approval required) are set only by an admin.                                                                       |
+| BR-14   | Eligibility criteria (eligible schools, minimum CGPA, dean approval required) are set only by an admin, and are checked only at acceptance. Criteria cannot change once any student has accepted the mission. |
 | BR-15   | CGPA is used only as an admin-set eligibility threshold. It is never a ranking factor, never inferred, and never shown to organizers or other students.                     |
 | BR-16   | When dean approval is required, a student is not confirmed until an admin records the dean's approval. A pending request holds a slot; a rejection frees it.                 |
 
@@ -221,7 +221,7 @@ Expiring one-use QR or check-in nonce; replay rejected; doubtful events flagged 
 | StudentProfile    | user_id, skills\[\], availability, matching_opt_out, school (SBSS, SEHS, SCI, CFGS or LC), cgpa (nullable) | Private by default; cgpa 0.00 to 4.00; cgpa visible to the student and admins only; every cgpa change audited with old and new value |
 | Organization      | id, name, organizer_ids                                                                                    | Scoped permission boundary                                        |
 | Mission           | id, organization_id, title, required_skills\[\], start, end, capacity, status, source (manual or ai_draft), eligible_schools\[\], min_cgpa (nullable), dean_approval_required | end later than start; empty eligible_schools means all; criteria fields set by admin only |
-| MissionAssignment | id, mission_id, student_id, status, applied_at, recommendation_id, dean_decided_by, dean_decided_at        | Unique active student+mission; capacity protected; PENDING_DEAN_APPROVAL counts toward capacity |
+| MissionAssignment | id, mission_id, student_id, status, applied_at, recommendation_id, dean_decided_by, dean_decided_at, dean_note (optional) | Unique active student+mission; capacity protected; PENDING_DEAN_APPROVAL counts toward capacity |
 | Recommendation    | id, mission_id, student_id, score, factors (JSON), algorithm_version                                       | Stored for explainability and audit                               |
 | Completion        | id, assignment_id, approved_by, status                                                                     | Unique approved completion per assignment                         |
 | WateringLedger    | id, user_id, completion_id, delta, reason, idempotency_key                                                 | Unique idempotency key; revocations are new entries with a reason |
@@ -316,6 +316,8 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | Organizer tries to set eligibility criteria  | Server rejects (BR-14)                                       |
 | Dean approval pending when the mission fills | Pending request keeps its slot; others get a full response   |
 | Dean rejects a pending student               | Slot freed; no watering or certificate                       |
+| Student lowers their CGPA after accepting    | Assignment kept; change audited with the old value           |
+| Admin edits criteria after a student accepted | Server rejects (BR-14)                                      |
 
 ## 13. API / Service Interfaces (Conceptual)
 

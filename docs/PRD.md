@@ -111,7 +111,7 @@ Rule: if time runs out, cut stretch items first. Never cut the end-to-end journe
 
 - The tree never penalizes inactivity. It shrinks only when an admin revokes a mistaken or fraudulent approval, with a logged reason.
 
-- Only admins set eligibility criteria. Opportunities without criteria are open to every student. CGPA is self-declared, used only as an eligibility threshold, never for ranking, and visible only to the student and admins.
+- Only admins set eligibility criteria. Opportunities without criteria are open to every student. CGPA is self-declared, used only as an eligibility threshold, never for ranking, and visible only to the student and admins. Eligibility is checked when a student accepts; later changes do not remove them, and criteria are locked once anyone has accepted.
 
 - When a mission requires dean approval, a student is confirmed only after the admin records the dean's approval. A pending request holds a slot; a rejection frees it.
 
