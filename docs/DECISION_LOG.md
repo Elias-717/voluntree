@@ -260,3 +260,51 @@ Rules:
 - Reason: Approved by Elias to close screen gaps, make the student experience rewarding, and make the live demo faster.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-030 — Visual style: Garden, Phosphor icons, Khathera's trees unchanged
+- Date: 2026-10-28
+- Change: no visual style → direction "A. Garden": cream background #FBF7EF, forest green #2E7D32 (the tree's own green), leaf tint #EAF3E2, water blue #4A9FD8, sun yellow #F2C14E, ink #23301F; Fraunces for headings and DM Sans for text; pill buttons, rounded cards (about 22px), soft shadows. Staff screens use the same palette on white with smaller radii and denser layouts. Icons: Phosphor (regular, with fill for active states). Tree art: Khathera's `public/tree/` SVGs unchanged. Directions B (Pop) and C (Calm) were not chosen.
+- Affects: Phase 2 visual design (Figma "Style directions" page and the screens to come), NFR-05 (contrast checked on the final palette). The Phosphor React package will be a new dependency at build time, to be confirmed by Elias then.
+- Reason: Warm and inviting for students, calm enough for staff and judges, and the green matches the tree so the tree stays the hero.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-031 — Light and dark mode
+- Date: 2026-10-28
+- Change: light only → an Appearance setting with System (default, follows the device), Light and Dark. Students set it in Me; staff in the user menu at the bottom of the sidebar; the landing page follows the device. The choice is saved on the device (no database change). Dark Garden palette: background #131A13, card #1E271D, primary #6CC070 with dark text on buttons, tint #263A22, water #6DB7EA, text #ECE9DF. Tree art unchanged in both modes.
+- Affects: Phase 2 visual design (Figma "Style directions" page, design kit and every screen in both modes), screen 16 (Me), staff sidebar, NFR-05 (contrast checked in both modes).
+- Reason: Requested by Elias; common student expectation, and comfortable for evening use.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-032 — Earth palette: green, light green, brown, black, white
+- Date: 2026-10-28
+- Change: Garden palette (cream background, forest green, water blue, sun yellow) → five colours only, no cream, no blue, no yellow. Light: background #FFFFFF, green (main) #4E7A3E, light green #DDEBCF, card #F3F7EE, brown #7A4E2D, black text #1C1C1A. Dark: background #121411, green #8DBB6E with dark text on buttons, light green #2A3524, card #1D211B, brown #B07A52, text #F1F1EC. Green is used for buttons, the active tab, banners, water drops and "you're in"; light green for cards, chips and the tree glow; brown for some mission icons, "spots left" and waiting tags; black for text and outlined buttons. Fonts (Fraunces, DM Sans), shapes, Phosphor icons, the Appearance setting and the tree art are unchanged.
+- Affects: Phase 2 visual design (Figma "Style directions" page, board "Earth palette — light and dark"), NFR-05 contrast checks.
+- Reason: Blue and yellow made the screens feel scattered; a smaller earthy palette is calmer and keeps the tree as the hero.
+- Decided by: Elias
+- Supersedes: DEC-030 (colour values only), DEC-031 (dark colour values only)
+
+### DEC-033 — Flat colours only: no glows, gradients or shadows
+- Date: 2026-10-28
+- Change: the tree sat on a soft radial glow, and DEC-030 allowed soft shadows → no glowing effects, gradients or drop shadows anywhere, in light or dark mode. The tree sits on a flat card-coloured panel (#F3F7EE light, #1D211B dark); cards are flat fills.
+- Affects: Phase 2 visual design (Figma "Earth palette" board and every screen to come), the growth celebration and landing page animations (motion only, no glow).
+- Reason: Requested by Elias; a flat look is calmer and matches the flat tree drawings.
+- Decided by: Elias
+- Supersedes: DEC-030 (soft shadows only)
+
+### DEC-034 — Layered surfaces and a green header band
+- Date: 2026-10-28
+- Change: plain white page with pale green cards → layered surfaces: light-mode page #EEF2EA (cool sage-grey, not cream) with white cards and a hairline border (#E3E8DD); a solid deep-green header band (#2F5D2A light, #22391F dark) on the student home, My tree and staff page headers, with the first card overlapping its edge. Dark mode keeps its layered near-black page and lighter cards. Still flat (DEC-033) and within the DEC-032 colours. Green text is used on white cards, not directly on the sage-grey page (4.43:1 there).
+- Affects: Phase 2 visual design: Figma variables color/bg/page, color/bg/card, color/border/default; new color/bg/header, color/text/on-header, color/text/on-header-muted; Mission card component border.
+- Reason: The plain white background looked generic; layering plus a branded header feels designed and professional, following the layered-surface pattern common in Meta's apps.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-035 — Inspiration-driven layout: watering gauge, black tab bar, sans headings, no white
+- Date: 2026-10-28
+- Change: Following Elias's reference (a nutrition-tracking app layout), using only the DEC-032 colours: (1) the student home's hero is a watering gauge: 12 radial pills in 4 groups of 3 (one group per tree stage), filled in green up to the student's watering count, with the tree, the count and "N more to <next stage>" in the middle; (2) the student tab bar becomes a black bar with rounded top corners, icons only (each with a screen-reader label), and My tree as a green rounded-square centre button; (3) round icon buttons in the top corners with a small centred title; (4) mission cards show an icon avatar, title and time, a large "spots left" number, a row of small facts (place, skill, who can join) and a round green arrow button; (5) headings move from Fraunces to DM Sans SemiBold with tight letter spacing (Display/Hero, Heading/Screen, Heading/Section; new Display/Number); (6) light mode avoids pure white: cards, tab-bar icons and light text use sage tints (#F4F7EF on #E9EFE3), all pairs at least 4.5:1. Kept: flat (no shadows or glows, DEC-033) and no orange or other off-palette colours.
+- Affects: Figma Design kit (text styles; new colour variables color/bg/navbar, color/text/on-nav, color/gauge/empty, color/gauge/filled; card, nav, on-primary and on-header now sage), Screens page sample "Student Home" (light and dark, bound to variables). Supersedes the Fraunces headings in DEC-030. The DEC-034 green header band is not used on this home layout; to be confirmed by Elias for other screens.
+- Reason: Elias wants the feel of the reference: friendly, modern, data-forward, with one clear hero metric.
+- Decided by: Elias
+- Supersedes: DEC-030 (heading font only)
