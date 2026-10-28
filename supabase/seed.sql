@@ -13,8 +13,8 @@ begin;
 -- Fixed ids keep the demo and the tests predictable.
 create temporary table seed_users (id uuid, email text, role public.user_role, display_name text) on commit drop;
 insert into seed_users values
-  ('00000000-0000-4000-a000-000000000001', 'admin@voluntree.test',     'admin',     'Nadia Karim (Admin)'),
-  ('00000000-0000-4000-a000-000000000002', 'organizer@voluntree.test', 'organizer', 'Hakim Zulkifli (Organizer)'),
+  ('00000000-0000-4000-a000-000000000001', 'admin@voluntree.test',     'admin',     'Madam Nadya'),
+  ('00000000-0000-4000-a000-000000000002', 'organizer@voluntree.test', 'organizer', 'Madam Fazilah'),
   ('00000000-0000-4000-a000-000000000011', 'aisha@voluntree.test',     'student',   'Aisha Rahman'),
   ('00000000-0000-4000-a000-000000000012', 'daniel@voluntree.test',    'student',   'Daniel Okafor'),
   ('00000000-0000-4000-a000-000000000013', 'meilin@voluntree.test',    'student',   'Mei Lin Tan'),
@@ -118,22 +118,22 @@ insert into public.missions (
 ) values
   -- Open to everyone; capacity 4 for demo step 5 (a fifth accept is refused).
   ('00000000-0000-4000-c000-000000002001', '00000000-0000-4000-b000-000000000001',
-   'Orientation Week Welcome Desk', 'Greet new students, hand out welcome packs and answer questions.',
-   '{"registration desk"}', 'Main Hall foyer',
+   'New Student Arrival Welcome', 'Welcome new students at the Main Gate, hand out welcome packs and point them the right way.',
+   '{"registration desk"}', 'Main Gate',
    '2026-11-03 09:00+08', '2026-11-03 13:00+08', 4,
    'PUBLISHED', 'Organizer confirms attendance', 'Stay hydrated; breaks every hour.',
    '{}', null, false, '00000000-0000-4000-a000-000000000002', '2026-10-27 10:00+08'),
   -- Posted by the admin: SCI only, minimum CGPA 3.00, dean approval required (demo steps 4 and 5).
   ('00000000-0000-4000-c000-000000002002', '00000000-0000-4000-b000-000000000001',
-   'SCI Research Showcase Guides', 'Guide visitors through the School of Computing and Informatics research posters.',
-   '{"tutoring","registration desk"}', 'SCI Building, Level 2',
+   'Red Cross Kedah Flood Aid', 'Help the Red Cross sort and pack flood-relief supplies for families in Kedah.',
+   '{"tutoring","registration desk"}', 'Alor Setar',
    '2026-11-04 14:00+08', '2026-11-04 17:00+08', 3,
    'PUBLISHED', 'Organizer confirms attendance', null,
    '{"SCI"}', 3.00, true, '00000000-0000-4000-a000-000000000001', '2026-10-27 11:00+08'),
   -- Already happened; Farid and Mei Lin attended and wait for approval (demo step 6).
   ('00000000-0000-4000-c000-000000002003', '00000000-0000-4000-b000-000000000001',
-   'Campus Clean-Up Morning', 'Litter pick and sorting around the residential colleges.',
-   '{"event setup","logistics"}', 'Residential College Courtyard',
+   'Building D Cleaning Help', 'Tidy, sweep and sort the shared spaces of Building D.',
+   '{"event setup","logistics"}', 'Building D',
    '2026-10-27 08:00+08', '2026-10-27 11:00+08', 6,
    'PUBLISHED', 'Organizer confirms attendance', 'Gloves provided; closed shoes required.',
    '{}', null, false, '00000000-0000-4000-a000-000000000002', '2026-10-20 10:00+08');

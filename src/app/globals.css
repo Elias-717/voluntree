@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
+/* Design tokens from the Figma design kit (DEC-032 to DEC-035). Flat colours only (DEC-033). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --page: #e9efe3;
+  --card: #f4f7ef;
+  --tint: #ddebcf;
+  --brown-tint: #efe3d6;
+  --nav: #f4f7ef;
+  --primary: #4e7a3e;
+  --text: #1c1c1a;
+  --muted: #5f625a;
+  --on-primary: #f4f7ef;
+  --accent: #4e7a3e;
+  --on-tint: #2f4f24;
+  --brown: #6b4226;
+  --border: #dce3d3;
+  --strong: #1c1c1a;
+  --header: #2f5d2a;
+  --navbar: #1c1c1a;
+  --on-nav: #a8ab9f;
+  --on-nav-active: #f4f7ef;
+  --gauge-empty: #d3dcc8;
+  --gauge-filled: #4e7a3e;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Dark Garden (DEC-031). "System" follows the device; Light and Dark are set on <html data-theme>. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --page: #121411;
+    --card: #1d211b;
+    --tint: #2a3524;
+    --brown-tint: #3a2a1e;
+    --nav: #171a15;
+    --primary: #8dbb6e;
+    --text: #f1f1ec;
+    --muted: #a8ab9f;
+    --on-primary: #10180c;
+    --accent: #8dbb6e;
+    --on-tint: #c6e2b0;
+    --brown: #e2b68e;
+    --border: #2a2e27;
+    --strong: #f1f1ec;
+    --header: #22391f;
+    --navbar: #0b0d0a;
+    --on-nav: #8a8d82;
+    --on-nav-active: #f1f1ec;
+    --gauge-empty: #2a3524;
+    --gauge-filled: #8dbb6e;
+    color-scheme: dark;
   }
 }
 
+:root[data-theme="dark"] {
+  --page: #121411;
+  --card: #1d211b;
+  --tint: #2a3524;
+  --brown-tint: #3a2a1e;
+  --nav: #171a15;
+  --primary: #8dbb6e;
+  --text: #f1f1ec;
+  --muted: #a8ab9f;
+  --on-primary: #10180c;
+  --accent: #8dbb6e;
+  --on-tint: #c6e2b0;
+  --brown: #e2b68e;
+  --border: #2a2e27;
+  --strong: #f1f1ec;
+  --header: #22391f;
+  --navbar: #0b0d0a;
+  --on-nav: #8a8d82;
+  --on-nav-active: #f1f1ec;
+  --gauge-empty: #2a3524;
+  --gauge-filled: #8dbb6e;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-card: var(--card);
+  --color-tint: var(--tint);
+  --color-brown-tint: var(--brown-tint);
+  --color-nav: var(--nav);
+  --color-primary: var(--primary);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-on-tint: var(--on-tint);
+  --color-brown: var(--brown);
+  --color-line: var(--border);
+  --color-strong: var(--strong);
+  --color-header: var(--header);
+  --color-navbar: var(--navbar);
+  --color-on-nav: var(--on-nav);
+  --color-on-nav-active: var(--on-nav-active);
+  --color-gauge-empty: var(--gauge-empty);
+  --color-gauge-filled: var(--gauge-filled);
+  --font-sans: var(--font-dm-sans);
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--page);
+  color: var(--text);
+  font-family: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
 }
