@@ -196,3 +196,11 @@ Rules:
 - Reason: (1) Keeps revocation meaningful without breaking the append-only audit (NFR-07) or the one-certificate-per-participation rule (FR-010, BR-07). (2) Makes tree growth visible in the demo and gives the opportunity-balance factor (FR-024) real variation to show.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-022 — Students can change their school
+- Date: 2026-10-28
+- Change: school fixed at registration (unspecified) → students can change their school any time, like CGPA; every change is audited with the old and new value. Existing assignments are kept (DEC-020).
+- Affects: SRS FR-028, FR-029, §7 StudentProfile, §12, §13. PRD §6 Identity row. `AGENTS.md` §3, §6 Q11, §7.
+- Reason: Students move from CFGS or LC into a degree school.
+- Decided by: Elias
+- Supersedes: none

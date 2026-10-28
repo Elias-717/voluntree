@@ -132,11 +132,11 @@ Each student shall see a tree with five stages: seed (0 waterings), sprout (3), 
 
 #### FR-028 \[M\] Student School and CGPA
 
-On registration each student shall declare their school (SBSS, SEHS, SCI, CFGS or LC) and may declare their current CGPA (0.00 to 4.00). A blank CGPA means none declared yet. Students may update their CGPA at any time; every change is recorded in the audit trail with the old and new value. CGPA is self-declared and not verified by the system. It is visible only to the student and to admins; organizers see only whether a student meets a mission's criteria. Acceptance: school is required; a CGPA outside the range is rejected; a CGPA change creates an audit entry with the old value; an organizer request for a student's CGPA returns forbidden.
+On registration each student shall declare their school (SBSS, SEHS, SCI, CFGS or LC) and may declare their current CGPA (0.00 to 4.00). A blank CGPA means none declared yet. Students may update their school and CGPA at any time (for example, moving from CFGS or LC into a degree school); every change to either is recorded in the audit trail with the old and new value. CGPA is self-declared and not verified by the system. It is visible only to the student and to admins; organizers see only whether a student meets a mission's criteria. Acceptance: school is required; a CGPA outside the range is rejected; a school or CGPA change creates an audit entry with the old value; an organizer request for a student's CGPA returns forbidden.
 
 #### FR-029 \[M\] Mission Eligibility Criteria
 
-From the admin dashboard, an admin may set on any mission: eligible schools (one or more; none means all schools), a minimum CGPA (none means no threshold), and whether dean approval is required (FR-030). Organizers cannot set criteria; their missions are open to all students. A student is eligible when their school is in the list (or the list is empty) and, if a minimum CGPA is set, their declared CGPA is at least that value. A student with no declared CGPA is not eligible for a CGPA-gated mission. Missions a student is not eligible for are hidden from that student in browsing and recommendations, and the server rejects their acceptance. Eligibility is checked only when a student accepts: later CGPA changes do not affect existing assignments, and an admin cannot change a mission's criteria once any student has accepted it. Acceptance: an organizer request to set criteria returns forbidden; a mission with no criteria is shown to every student; a CGPA equal to the minimum is eligible; an ineligible student's direct accept request returns forbidden; a criteria change after the first acceptance is rejected; a student who lowers their CGPA after accepting keeps the assignment.
+From the admin dashboard, an admin may set on any mission: eligible schools (one or more; none means all schools), a minimum CGPA (none means no threshold), and whether dean approval is required (FR-030). Organizers cannot set criteria; their missions are open to all students. A student is eligible when their school is in the list (or the list is empty) and, if a minimum CGPA is set, their declared CGPA is at least that value. A student with no declared CGPA is not eligible for a CGPA-gated mission. Missions a student is not eligible for are hidden from that student in browsing and recommendations, and the server rejects their acceptance. Eligibility is checked only when a student accepts: later school or CGPA changes do not affect existing assignments, and an admin cannot change a mission's criteria once any student has accepted it. Acceptance: an organizer request to set criteria returns forbidden; a mission with no criteria is shown to every student; a CGPA equal to the minimum is eligible; an ineligible student's direct accept request returns forbidden; a criteria change after the first acceptance is rejected; a student who lowers their CGPA or changes school after accepting keeps the assignment.
 
 #### FR-030 \[M\] Dean Approval of Participation
 
@@ -218,7 +218,7 @@ Expiring one-use QR or check-in nonce; replay rejected; doubtful events flagged 
 | Entity            | Key fields (illustrative)                                                                                  | Constraints                                                       |
 |-------------------|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | User              | id, auth_subject, role, display_name, consent_version                                                      | Unique auth_subject; soft deactivation                            |
-| StudentProfile    | user_id, skills\[\], availability, matching_opt_out, school (SBSS, SEHS, SCI, CFGS or LC), cgpa (nullable) | Private by default; cgpa 0.00 to 4.00; cgpa visible to the student and admins only; every cgpa change audited with old and new value |
+| StudentProfile    | user_id, skills\[\], availability, matching_opt_out, school (SBSS, SEHS, SCI, CFGS or LC), cgpa (nullable) | Private by default; cgpa 0.00 to 4.00; cgpa visible to the student and admins only; every school or cgpa change audited with old and new value |
 | Organization      | id, name, organizer_ids                                                                                    | Scoped permission boundary                                        |
 | Mission           | id, organization_id, title, required_skills\[\], start, end, capacity, status, source (manual or ai_draft), eligible_schools\[\], min_cgpa (nullable), dean_approval_required | end later than start; empty eligible_schools means all; criteria fields set by admin only |
 | MissionAssignment | id, mission_id, student_id, status, applied_at, recommendation_id, dean_decided_by, dean_decided_at, dean_note (optional) | Unique active student+mission; capacity protected; PENDING_DEAN_APPROVAL counts toward capacity |
@@ -318,7 +318,7 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | Organizer tries to set eligibility criteria  | Server rejects (BR-14)                                       |
 | Dean approval pending when the mission fills | Pending request keeps its slot; others get a full response   |
 | Dean rejects a pending student               | Slot freed; no watering or certificate                       |
-| Student lowers their CGPA after accepting    | Assignment kept; change audited with the old value           |
+| Student lowers their CGPA or changes school after accepting | Assignment kept; change audited with the old value |
 | Admin edits criteria after a student accepted | Server rejects (BR-14)                                      |
 
 ## 13. API / Service Interfaces (Conceptual)
@@ -330,7 +330,7 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | POST /missions/:id/publish     | Publish validated mission                  | Organizer or admin        |
 | GET /missions/recommended      | Filtered, ranked missions with explanation; only missions the student is eligible for | Signed-in student |
 | POST /missions/:id/accept      | Accept; transactional eligibility and capacity check; pending if dean approval is required | Student |
-| PUT /students/me/academic      | Set own school and CGPA; CGPA change audited | Student (own)           |
+| PUT /students/me/academic      | Set own school and CGPA; every change audited | Student (own)           |
 | POST /assignments/:id/dean-decision | Record the dean's approval or rejection | Admin                   |
 | POST /completions/:id/review   | Approve or reject attendance               | Organizer or admin        |
 | POST /completions/:id/revoke   | Revoke an approval with a logged reason    | Admin                     |

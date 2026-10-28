@@ -90,11 +90,11 @@ Voluntree helps AIU fill event volunteer slots fairly. AI drafts missions from a
 - Demo seed: students have varied past participation, seeded as real completed missions; the demo student starts at 2 waterings so the tree grows to sprout in demo step 6.
 - A student's tree is visible only to that student (BR-13).
 - AI is advisory. The LLM drafts missions only. Overrides need a logged reason (BR-11).
-- Students declare their school (SBSS, SEHS, SCI, CFGS or LC) and an optional CGPA at registration. CGPA is editable any time, every change is audited, and only the student and admins see it (FR-028).
+- Students declare their school (SBSS, SEHS, SCI, CFGS or LC) and an optional CGPA at registration. School and CGPA are editable any time (e.g. moving from CFGS or LC into a degree school), every change is audited, and only the student and admins see it (FR-028).
 - Only admins set eligibility criteria on a mission: eligible schools, a minimum CGPA, and dean approval. Missions without criteria are open to all. Ineligible students never see a gated mission (FR-029, BR-14).
 - CGPA is a hard eligibility filter only, never a score factor. Fairness balancing applies within the eligible pool (BR-15).
 - Dean approval gates each student's participation. A pending request holds a slot; the admin records the dean's decision with an optional note. There is no dean role (FR-030, BR-16).
-- Eligibility is checked only at acceptance. Later CGPA changes keep existing assignments; criteria are locked once any student has accepted (FR-029, BR-14).
+- Eligibility is checked only at acceptance. Later school or CGPA changes keep existing assignments; criteria are locked once any student has accepted (FR-029, BR-14).
 
 ## 4. Stack
 
@@ -141,14 +141,14 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 8. Gemini data handling: strip personal details before sending? Which tier and terms?
 9. Is the organizer a primary or a secondary user? The SRS and PRD disagree.
 10. The SRS header says "2-week build", while the plan says 2 days.
-11. Can a student change their school after registration, or only through an admin? FR-028 makes CGPA editable but says nothing about school.
+11. Resolved (DEC-022): students can change their school any time, audited like CGPA.
 
 ## 7. Current status
 
 Update this section after every completed task.
 
 - **Phase:** 0 complete; Phase 1 not started
-- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-021; DEC-015 to DEC-020 add student school and CGPA, admin eligibility criteria and dean approval after the advisor meeting); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
+- **Done:** requirements finalized (SRS and PRD v1.1, decisions DEC-000 to DEC-022; DEC-015 to DEC-020 add student school and CGPA, admin eligibility criteria and dean approval after the advisor meeting); `AGENTS.md`, `CLAUDE.md`, `docs/` and the team assignment files pushed to `Elias-717/voluntree`. Task 0 on branch `elias/phase-0-setup`: Next.js 16.4.3 scaffold (TypeScript, Tailwind, ESLint, App Router, `src/`), dependencies installed (`@supabase/supabase-js`, `@supabase/ssr`, `zod`, `@google/genai`, `pdf-lib`; dev: `vitest`, `supabase` CLI, `@types/node` ^22), `vitest.config.ts`, `src/types/domain.ts`, `.env.example`, empty `docs/ai-usage/` logs. Supabase project `voluntree` (`aukdxiljmwqdfrwsayqk`) linked in `.env.local`
 - **Next:** Elias: Task 1 (Phase 1 data foundation, now including FR-028 to FR-030). Khathera: Task 1 (tree SVGs); Task 3 matching now includes the school and CGPA filters
 - **Blockers:** none
 
