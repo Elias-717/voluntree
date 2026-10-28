@@ -40,11 +40,11 @@ Khathera owns `public/tree/`, `src/lib/tree/`, `src/lib/certificate/`, `src/lib/
 
 ### Task 1 — Phase 1 data foundation
 
-Follow the phase plan in `AGENTS.md` §5: tables, RLS, the functions `accept_mission`, `approve_completion` and `revoke_completion`, seed data, and database tests.
+Follow the phase plan in `AGENTS.md` §5: tables, RLS, the functions `accept_mission`, `approve_completion`, `revoke_completion` and `record_dean_decision`, seed data, and database tests. Includes student school and CGPA, mission eligibility criteria and dean approval (FR-028 to FR-030, DEC-015 to DEC-017).
 
 ### Task 2 — Phase 2 core journey without AI
 
-Agree the screen list with Elias first. Then build the screens and server actions, using placeholders where Khathera's modules are not merged yet.
+Agree the screen list with Elias first. It must include school and CGPA at registration, the admin mission form with eligibility criteria, and the admin dean-approval queue (FR-028 to FR-030). Then build the screens and server actions, using placeholders where Khathera's modules are not merged yet.
 
 ### Task 3 — Phase 4 LLM intake (FR-023)
 

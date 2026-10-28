@@ -140,3 +140,67 @@ Rules:
 - Reason: `next dev` re-adds the block whenever it is missing, which would leave `AGENTS.md` as an uncommitted change on every branch and cause merge conflicts. With the block committed, `next dev` leaves the file unchanged.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-015 — Student school and CGPA
+- Date: 2026-10-28
+- Change: none → new FR-028 [M]: students declare their school (SBSS, SEHS, SCI, CFGS or LC) and an optional current CGPA (0.00 to 4.00) at registration. CGPA is editable any time; every change is audited with the old and new value. CGPA is self-declared, visible only to the student and admins; organizers see only whether a student meets criteria. StudentProfile gains school and cgpa; AuditEvent gains details.
+- Affects: SRS §4, FR-028, §7 StudentProfile and AuditEvent, §12, §13. PRD §4, §5, §6, §7. `src/types/domain.ts` (School, Student.school, Student.cgpa).
+- Reason: Advisor meeting: schools need volunteers from their own students, sometimes above a CGPA threshold.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-016 — Admin-set mission eligibility criteria
+- Date: 2026-10-28
+- Change: missions open to all → an admin may set eligible schools (any of; none means all) and a minimum CGPA on any mission. Organizers cannot set criteria; their missions stay open to all. A student without a declared CGPA fails a CGPA threshold. Ineligible students never see a gated mission and the server rejects their acceptance. New FR-029 [M], BR-14. Admins and organizers both create missions.
+- Affects: SRS §1.2, §4, FR-004, FR-006, FR-007, FR-029, BR-14, §7 Mission, §10 Stage 1, §12, §13, §14 steps 4 and seed. PRD §1, §2.2, §4, §5, §6, §7, §9.2, §13. `src/types/domain.ts` (Mission criteria fields, exclusion reasons). `docs/team/KHATHERA.md` Task 3.
+- Reason: Advisor meeting: different schools need different volunteers.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-017 — Optional dean approval of participation
+- Date: 2026-10-28
+- Change: none → an admin may tick "dean approval required" on a mission. A student's acceptance then enters PENDING_DEAN_APPROVAL and holds a slot; the admin records the dean's decision on the dean's behalf (ACCEPTED or DEAN_REJECTED, which frees the slot). No dean role is added. New FR-030 [M], BR-16; MissionAssignment gains dean_decided_by and dean_decided_at.
+- Affects: SRS §3, §4, FR-006, FR-030, BR-16, §7 MissionAssignment, §8 Assignment, §12, §13, §14 step 5. PRD §4, §5, §6, §7, §9.2. `src/types/domain.ts` (Mission.deanApprovalRequired, acceptedCount comment).
+- Reason: Advisor meeting: some schools need the dean's sign-off on volunteers.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-018 — CGPA reconciled with responsible AI and fairness
+- Date: 2026-10-28
+- Change: "the matching algorithm never uses grades" → CGPA is used only as an admin-set hard eligibility filter before ranking, never as a score factor, never inferred, never shown to organizers or other students (new BR-15). Fairness balancing and the cold-start rule apply within the eligible pool. Consent screen states that school and CGPA are used only for eligibility and that some opportunities are restricted. The evaluation reports spread within eligible pools and the share of gated missions.
+- Affects: SRS FR-007, FR-025, FR-026, BR-15, §9, §10, NFR-09, §17. PRD §3 G-04, §8, §11. `docs/team/KHATHERA.md` Tasks 3 and 4.
+- Reason: Without this, the CGPA requirement contradicts SRS §9 and the fairness pitch (FR-024).
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-019 — Plan updated for DEC-015 to DEC-018; Phase 0 complete
+- Date: 2026-10-28
+- Change: Phases 1, 2, 3 and 5 extended with FR-028 to FR-030 (columns, RLS, `record_dean_decision`, eligibility in `accept_mission`, registration fields, admin criteria form, dean-approval queue, eligibility filters, within-pool evaluation). All in the Oct 29 build. Phase 0 marked complete. Open questions 11 to 13 added.
+- Affects: `AGENTS.md` §3, §5, §6, §7. `docs/team/ELIAS.md` Tasks 1 and 2. SRS §15 Oct 28 row. PRD §10 Oct 28 row.
+- Reason: Keep the plan in line with the new requirements.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-020 — Eligibility checked at acceptance; dean note optional; CGPA range confirmed
+- Date: 2026-10-28
+- Change: (1) Open question on CGPA or criteria changing after acceptance → eligibility is checked only when a student accepts; later CGPA changes keep existing assignments; an admin cannot change a mission's criteria once any student has accepted it. (2) Dean decision → recorded with an optional note; MissionAssignment gains dean_note. (3) CGPA range 0.00 to 4.00 confirmed. AGENTS.md open questions 11 to 13 resolved; new question 11 on school edits.
+- Affects: SRS FR-029, FR-030, BR-14, §7 MissionAssignment, §12. PRD §7. `AGENTS.md` §3, §5 Phase 1 exit check, §6, §7.
+- Reason: Lowest-risk option for the Oct 29 build; adds no new assignment state. Gaming via CGPA edits is visible in the audit log and caught by dean approval where required.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-021 — Revoked certificates and demo seed history
+- Date: 2026-10-28
+- Change: (1) Open question 3 → when an approval is revoked, its certificate record is kept, marked revoked and linked to the revocation entry; download is rejected and the student sees it as revoked. A later re-approval of the same participation reactivates the same certificate and serial. Certificate gains status and revocation_entry_id. (2) Open question 4 → seed students with varied past participation (e.g. 0, 0, 1, 2, 4, 6, 9, 11) as real completed missions with ledger entries and certificates; the demo student starts at 2 waterings so step 6 grows the tree to sprout. Demo step 6 includes switching to that student's login (BR-13).
+- Affects: SRS FR-010, §7 Certificate, §12, §13, §14 seed and step 6. PRD §7. `AGENTS.md` §3, §5 Phase 1, §6 Q3 and Q4, §7.
+- Reason: (1) Keeps revocation meaningful without breaking the append-only audit (NFR-07) or the one-certificate-per-participation rule (FR-010, BR-07). (2) Makes tree growth visible in the demo and gives the opportunity-balance factor (FR-024) real variation to show.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-022 — Students can change their school
+- Date: 2026-10-28
+- Change: school fixed at registration (unspecified) → students can change their school any time, like CGPA; every change is audited with the old and new value. Existing assignments are kept (DEC-020).
+- Affects: SRS FR-028, FR-029, §7 StudentProfile, §12, §13. PRD §6 Identity row. `AGENTS.md` §3, §6 Q11, §7.
+- Reason: Students move from CFGS or LC into a degree school.
+- Decided by: Elias
+- Supersedes: none
