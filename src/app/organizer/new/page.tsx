@@ -1,5 +1,6 @@
 // Screen 10: new mission (or editing a draft with ?id=). Manual form; the AI draft is Phase 4.
 
+import { CancelButton } from "@/components/cancel-button";
 import { MissionForm } from "@/components/mission-form";
 import { loadDraft } from "@/lib/db/mission-draft";
 import { createClient } from "@/lib/db/server";
@@ -13,7 +14,10 @@ export default async function NewMission({ searchParams }: PageProps<"/organizer
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-[-0.03em]">{draft ? "Edit draft" : "New mission"}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-[-0.03em]">{draft ? "Edit draft" : "New mission"}</h1>
+        {draft?.id && <CancelButton missionId={draft.id} draft />}
+      </div>
       <p className="mb-6 text-sm text-muted">Students see it once you publish. Nothing is published automatically.</p>
       <MissionForm admin={false} draft={draft} />
     </>

@@ -112,6 +112,22 @@ export async function revokeApproval(completionId: string, missionId: string, re
   return review("revoke_completion", { p_completion_id: completionId, p_reason: reason }, missionId);
 }
 
+const CANCEL_ERRORS: Record<string, string> = {
+  HAS_APPROVALS: "Some participations are already approved. An admin must revoke them first.",
+  NOT_CANCELLABLE: "Only drafts and published missions can be cancelled.",
+  FORBIDDEN: "Only this mission's organizer or an admin can cancel it.",
+};
+
+/** Cancel a draft or a published mission (DEC-047). Students keep no penalty and get their time back. */
+export async function cancelMission(missionId: string): Promise<string | null> {
+  const me = await requireStaff();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("cancel_mission", { p_mission_id: missionId });
+  if (error) return CANCEL_ERRORS[error.message.split(":")[0]] ?? "Couldn't cancel the mission.";
+  revalidatePath(homeFor(me.role), "layout");
+  redirect(homeFor(me.role) + (me.role === "admin" ? "/missions" : ""));
+}
+
 /** The admin records the dean's decision on a pending request (FR-030). */
 export async function recordDeanDecision(assignmentId: string, approved: boolean, note: string): Promise<string | null> {
   const me = await requireStaff();

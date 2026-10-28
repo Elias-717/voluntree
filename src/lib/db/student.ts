@@ -70,7 +70,7 @@ export async function loadStudent(supabase: SupabaseClient, studentId: string, d
     // Every assignment, in all three statuses (DEC-036).
     supabase
       .from("mission_assignments")
-      .select("mission_id, status, missions(starts_at, ends_at)")
+      .select("mission_id, status, missions(starts_at, ends_at, status)")
       .eq("student_id", studentId),
     // All of the student's approved participations, all time (DEC-036).
     supabase
@@ -80,11 +80,12 @@ export async function loadStudent(supabase: SupabaseClient, studentId: string, d
       .eq("mission_assignments.student_id", studentId),
   ]);
 
+  // Cancelled missions no longer hold the student's time (DEC-047).
   const commitments: Commitment[] = ((assignments ?? []) as unknown as {
     mission_id: string;
     status: Commitment["status"];
-    missions: { starts_at: string; ends_at: string };
-  }[]).map((a) => ({
+    missions: { starts_at: string; ends_at: string; status: string };
+  }[]).filter((a) => a.missions.status !== "CANCELLED").map((a) => ({
     missionId: a.mission_id,
     status: a.status,
     window: { start: a.missions.starts_at, end: a.missions.ends_at },

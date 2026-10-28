@@ -90,7 +90,9 @@ export default async function MissionPage({ params }: PageProps<"/student/missio
       )}
 
       <div className="mt-auto pt-6">
-        {mine ? (
+        {row.status === "CANCELLED" ? (
+          <p className="rounded-full bg-gauge-empty py-4 text-center font-medium text-muted">This mission was cancelled. Nothing is lost.</p>
+        ) : mine ? (
           <p className="rounded-full bg-tint py-4 text-center font-medium text-on-tint">
             {mine.status === "ACCEPTED" && new Date(row.ends_at) <= new Date()
               ? "Done. Your organizer is checking attendance."

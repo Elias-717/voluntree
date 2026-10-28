@@ -396,3 +396,11 @@ Rules:
 - Reason: Approved by Elias; keeps the human in the loop, records every AI call for the declaration form, and sends as little personal data as possible.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-047 — Cancelling missions and discarding drafts
+- Date: 2026-10-29
+- Change: found in the live end-to-end test. (1) Assignments on a cancelled mission no longer hold the student's time: `accept_mission` and the matching input skip cancelled missions, and My missions shows them under Past as "Mission cancelled" (SRS §12: mission cancelled after sign-up, no penalty). (2) New function `cancel_mission`: the mission's organizer or an admin cancels a draft or a published mission, with an audit entry; a mission with an approved participation cannot be cancelled until an admin revokes it. (3) The completeness rule now applies only to published and completed missions, so an incomplete draft can be discarded (cancelled). (4) Staff get "Cancel mission" on the mission page and "Discard draft" on the draft page. Student notification of a cancellation stays with FR-012 (Should).
+- Affects: new migration `20261029120000_cancel_missions.sql` (applied to the live project), `accept_mission`, missions check constraint, student and staff screens.
+- Reason: Approved by Elias after the end-to-end test found that cancelled missions still blocked students and drafts could never be removed.
+- Decided by: Elias
+- Supersedes: none
