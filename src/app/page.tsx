@@ -2,12 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import {
   ArrowRight, BookOpen, Certificate, Drop, ForkKnife, HandHeart, LockSimple, Scales, Sparkle,
 } from "@phosphor-icons/react/ssr";
 import { Logo, PrototypeNote } from "@/components/logo";
-import { getMe, homeFor } from "@/lib/db/session";
 
 // Illustrative examples for the landing strip (DEC-038, synthetic). The live missions are behind sign-in.
 const EXAMPLES = [
@@ -18,10 +16,7 @@ const EXAMPLES = [
   { title: "Hari Raya Food Serving", when: "Hari Raya · Dining Hall", spots: 15, Icon: ForkKnife, brown: false },
 ];
 
-export default async function Landing() {
-  const me = await getMe();
-  if (me) redirect(homeFor(me.role));
-
+export default function Landing() {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-5 sm:px-8">

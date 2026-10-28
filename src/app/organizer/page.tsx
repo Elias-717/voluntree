@@ -4,6 +4,9 @@ import { Logo } from "@/components/logo";
 import { requireRole } from "@/lib/db/session";
 import { signOut } from "../sign-in/actions";
 
+// Signed-in pages read the session cookie, so they render per request.
+export const instant = false;
+
 export default async function OrganizerHome() {
   const me = await requireRole("organizer");
   return (
