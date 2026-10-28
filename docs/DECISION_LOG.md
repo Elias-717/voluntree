@@ -348,3 +348,27 @@ Rules:
 - Reason: Organizers need a way to reach the students on their missions; keeping it optional and limited to assigned missions collects and shows as little personal data as possible.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-041 — Phase 2 build choices
+- Date: 2026-10-28
+- Change: (1) DEC-030's icon package confirmed: `@phosphor-icons/react` 2.1.10 added as a dependency. (2) Demo seed renamed to match the designs (DEC-038): the three demo missions become New Student Arrival Welcome (was Orientation Week Welcome Desk), Red Cross Kedah Flood Aid (was SCI Research Showcase Guides) and Building D Cleaning Help (was Campus Clean-Up Morning); the admin becomes Madam Nadya and the organizer Madam Fazilah. Dates, capacities, skills and criteria are unchanged, so the matching seed check and the DB tests still hold. (3) Sign-in for the Oct 29 build is the demo accounts only (DEC-026 one-tap demo sign-in); screens 2 and 3 run as first-login onboarding, with no self-registration form. (4) The organizer's recommended-students panel with override and logged reason (BR-11, open question 6) stays in Phase 3; Phase 2 uses matching on the student side only. (5) Each Phase 2 slice is merged to `main` as soon as it works, so the Vercel URL always shows the latest working journey.
+- Affects: `package.json`, lockfile, `supabase/seed.sql` and the live demo data, Phase 2 build order, AGENTS.md §6 Q6 (unchanged, deferred).
+- Reason: Approved by Elias to ship the core journey before the Oct 29 submission with the least risk.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-042 — Scroll-grown tree hero for the landing page (after the journey)
+- Date: 2026-10-28
+- Change: the DEC-038 landing hero → a scroll-scrubbed hero adapted from the 21st.dev component "LycorisSpecimen" (by kedhareswer; its scroll, camera and WebGL engine kept, the flower replaced by a procedural tree that grows from seed to blossom over six frames: Seed, Sprout, Sapling, Young tree, Full tree, Bloom). Kept from existing decisions: attendance wording, no hours (DEC-008): frame 4 "Your organizer confirms you were there." / "Every approved participation counts, exactly once."; frame 5 "Every approved volunteer gets a certificate."; the DEC-032 palette, DM Sans headings and light and dark mode (DEC-031, DEC-035), not the brief's cream, rust and Fraunces; the frame 2 "Why recommended" card shows the real factors (skills, opportunity balance, reliability; DEC-036), not availability. Built after the Phase 2 journey works on Vercel. The component's licence is checked on its 21st.dev page before use and credited in the README and the declaration list.
+- Affects: `src/components/ui/` (new), landing page, README, declaration form third-party sources.
+- Reason: Elias wants a memorable landing page; the conflicting parts of the brief were resolved in favour of the logged decisions.
+- Decided by: Elias
+- Supersedes: DEC-038 item (3) hero layout, once built
+
+### DEC-043 — Phase 2 database support: consent, spots left, phone contacts
+- Date: 2026-10-28
+- Change: new migration `20261028150000_phase2_support.sql`, applied to the live project: (1) `record_consent(version, opt_out)` lets a student store the consent version and the matching opt-out (FR-025); profiles keep no direct update grant. (2) `mission_spots()` returns how many spots are held (ACCEPTED plus PENDING_DEAN_APPROVAL) on each published mission, never who holds them, because students cannot read other students' assignments (FR-006, FR-030). (3) DEC-040's phone number: an optional `student_profiles.phone` column with a format check, updatable by the student; organizers read it only through `mission_contacts(mission_id)`, which returns names and phones of PENDING_DEAN_APPROVAL or ACCEPTED students to that mission's organizer or an admin. A function is used instead of a row-level policy so organizers never see the CGPA on the same row (BR-15). The DEC-041 seed rename was also applied to the live data.
+- Affects: `supabase/migrations/`, `supabase/seed.sql`, live Supabase project, Phase 2 student and organizer screens.
+- Reason: Approved by Elias; the Phase 1 schema could not save consent, show spots left to students, or share phone numbers on assigned missions only.
+- Decided by: Elias
+- Supersedes: none
