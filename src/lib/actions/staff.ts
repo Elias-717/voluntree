@@ -10,6 +10,7 @@ import type { School } from "@/types/domain";
 import { createClient } from "@/lib/db/server";
 import { getMe, homeFor } from "@/lib/db/session";
 import { myOrganizationIds } from "@/lib/db/staff";
+import { blanksOf, draftMission, hashPrompt, INTAKE_MODEL, INTAKE_VERSION, type Draft } from "@/lib/intake/draft";
 
 const SCHOOLS: School[] = ["SBSS", "SEHS", "SCI", "CFGS", "LC"];
 
@@ -74,9 +75,11 @@ export async function saveMission(_state: string | null, form: FormData): Promis
     const organizationId =
       me.role === "admin" ? text("organization") : (await myOrganizationIds(supabase, me.id))[0];
     if (!organizationId) return "You are not a member of any organization.";
+    // Missions started from an AI draft are recorded as such (FR-023).
+    const source = form.get("source") === "ai_draft" ? "ai_draft" : "manual";
     ({ error } = await supabase
       .from("missions")
-      .insert({ ...fields, organization_id: organizationId, created_by: me.id, status: publish ? "PUBLISHED" : "DRAFT" }));
+      .insert({ ...fields, source, organization_id: organizationId, created_by: me.id, status: publish ? "PUBLISHED" : "DRAFT" }));
   }
   if (error) {
     if (error.message.startsWith("CRITERIA_LOCKED")) return "Eligibility can't change after a student has accepted.";
@@ -119,6 +122,33 @@ export async function recordDeanDecision(assignmentId: string, approved: boolean
   if (error) return error.message.startsWith("NOT_PENDING") ? "This request was already decided." : "Couldn't save the decision.";
   revalidatePath(homeFor(me.role), "layout");
   return null;
+}
+
+export type DraftResult = { draft: Draft; blanks: string[] } | { error: string };
+
+/** Paste an announcement, get a draft to check (FR-023). Every call is logged in ai_usage_log. */
+export async function draftFromAnnouncement(announcement: string): Promise<DraftResult> {
+  await requireStaff();
+  if (announcement.trim().length < 20) return { error: "Paste the full announcement first." };
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kuala_Lumpur" }).format(new Date());
+
+  let prompt = "";
+  let draft: Draft | null = null;
+  try {
+    ({ prompt, draft } = await draftMission(announcement, today));
+  } catch {
+    draft = null;
+  }
+  const supabase = await createClient();
+  await supabase.from("ai_usage_log").insert({
+    feature: "mission_intake",
+    model: INTAKE_MODEL,
+    version: INTAKE_VERSION,
+    prompt_hash: hashPrompt(prompt || announcement),
+    succeeded: draft !== null,
+  });
+  if (!draft) return { error: "The AI couldn't draft this one. Fill in the form by hand instead." };
+  return { draft, blanks: blanksOf(draft) };
 }
 
 async function review(fn: string, args: Record<string, unknown>, missionId: string): Promise<string | null> {
