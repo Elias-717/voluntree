@@ -108,7 +108,7 @@ Students shall accept a mission. Withdrawal before an organizer-defined cutoff i
 
 #### FR-007 \[M\] Explainable Volunteer Matching
 
-Matching shall first exclude hard conflicts (time overlap, required eligibility including school and minimum CGPA (FR-029), capacity), then rank the remaining students by a transparent weighted score (section 10). CGPA is never a score factor (BR-15). Acceptance: seeded fixtures give deterministic results; every recommendation shows a Why recommended panel listing the factors that applied.
+Matching considers only published missions. It shall first exclude hard conflicts (an existing assignment for the same mission in any status, time overlap with a pending or accepted assignment, declared availability that does not cover the whole mission window (empty availability counts as unknown and is not excluded), eligibility by school and minimum CGPA (FR-029), capacity), then rank the remaining students by a transparent weighted score (section 10). CGPA is never a score factor (BR-15). Acceptance: seeded fixtures give deterministic results; every recommendation shows a Why recommended panel listing the factors that applied.
 
 #### FR-008 \[M\] Participation Verification
 
@@ -154,7 +154,7 @@ The ranking shall include an exposure-balancing factor that raises students who 
 
 #### FR-025 \[M\] Consent and Transparency Screen
 
-On first login students shall see a plain-language notice stating what data is used (declared skills and availability for ranking; declared school and CGPA only to check eligibility for missions that set criteria), that some opportunities are restricted by school criteria, that participation is optional, how to opt out, and that humans make final decisions. A consent version is stored per user. Acceptance: a student who opts out of matching is excluded from ranking but can still browse the missions they are eligible for; the screen is shown in the demo.
+On first login students shall see a plain-language notice stating what data is used (declared availability to check that you can attend the whole mission, and declared skills for ranking; declared school and CGPA only to check eligibility for missions that set criteria), that some opportunities are restricted by school criteria, that participation is optional, how to opt out, and that humans make final decisions. A consent version is stored per user. Acceptance: a student who opts out of matching is excluded from ranking but can still browse the missions they are eligible for; the screen is shown in the demo.
 
 #### FR-026 \[M\] Baseline Evaluation Report
 
@@ -251,7 +251,7 @@ This section is built into the product, not only documented, because the rubric 
 
 - Consent: FR-025 consent screen with opt-out and stored consent version.
 
-- Data minimization: the matching score uses only declared skills, declared availability, existing assignment conflicts and optional coarse distance. It never uses grades, gender, nationality, religion or other protected or sensitive attributes, and never infers them. The only use of grades is a minimum CGPA that an admin sets on a mission; it is applied as a hard eligibility filter before ranking, never as a score factor (BR-15). CGPA is self-declared, visible only to the student and admins, and every change is audited (FR-028). Where a school requires it, dean approval (FR-030) is the human check on declared CGPA.
+- Data minimization: matching uses only declared skills, declared availability (as a filter, never in the score), existing assignment conflicts and optional coarse distance. It never uses grades, gender, nationality, religion or other protected or sensitive attributes, and never infers them. The only use of grades is a minimum CGPA that an admin sets on a mission; it is applied as a hard eligibility filter before ranking, never as a score factor (BR-15). CGPA is self-declared, visible only to the student and admins, and every change is audited (FR-028). Where a school requires it, dean approval (FR-030) is the human check on declared CGPA.
 
 - Eligibility and fairness: eligibility is a policy decision made by a human (the admin) per mission (FR-029). Fairness balancing (FR-024) then applies among the eligible students. Missions without criteria are the default and are open to every student.
 
@@ -269,15 +269,16 @@ This section is built into the product, not only documented, because the rubric 
 
 ## 10. Matching Algorithm Contract
 
-Stage 1: Filter out students with time conflicts, missing required eligibility, a school not in the mission's eligible schools, a CGPA below the mission's minimum or no declared CGPA when a minimum is set (FR-029), matching opt-out, or a full mission. Stage 2: Compute a transparent weighted score for the remaining students. CGPA never enters Stage 2 (BR-15); opportunity balance and the cold-start rule apply within the eligible pool.
+Stage 1: Only published missions are matched. Filter out students who already have an assignment for the mission in any status (PENDING_DEAN_APPROVAL, ACCEPTED or DEAN_REJECTED); students with a time conflict (an overlapping PENDING_DEAN_APPROVAL or ACCEPTED assignment on another mission); students whose declared availability does not cover the whole mission window (an empty availability list counts as unknown: the student is not excluded and is asked to confirm before accepting); a school not in the mission's eligible schools; a CGPA below the mission's minimum or no declared CGPA when a minimum is set (FR-029); matching opt-out; or a full mission (pending and accepted assignments both hold a slot). Required skills are not a filter; they count only in the skill-alignment factor. Dean approval does not affect matching. These filters apply to recommendations only; acceptance rules are enforced by accept_mission, which does not check availability. Stage 2: Compute a transparent weighted score for the remaining students. CGPA never enters Stage 2 (BR-15); opportunity balance and the cold-start rule apply within the eligible pool.
 
 | Factor               | Starting weight | Notes                                                        |
 |----------------------|-----------------|--------------------------------------------------------------|
-| Skill alignment      | 35%             | Overlap with required skills                                 |
-| Availability fit     | 30%             | Declared availability vs mission window                      |
-| Opportunity balance  | 20%             | Higher for students with fewer recent opportunities (FR-024) |
-| Optional proximity   | 10%             | Coarse only; omitted if unavailable                          |
-| Verified reliability | 5%              | Neutral default for new students (cold-start)                |
+| Skill alignment      | 50% (35/70)     | Overlap with required skills                                 |
+| Opportunity balance  | 28.6% (20/70)   | Higher for students with fewer recent opportunities (FR-024) |
+| Optional proximity   | 14.3% (10/70)   | Coarse only; omitted if unavailable                          |
+| Verified reliability | 7.1% (5/70)     | Neutral default for new students (cold-start)                |
+
+Availability is not a score factor: full coverage of the mission window is a Stage 1 filter for recommendations only, and unknown availability does not change the score (DEC-036). Its former 30% weight is redistributed proportionally; weights are computed from the base values 35, 20, 10 and 5 divided by the total of the factors that apply. Opportunity balance counts all of the student's approved participations, all time (DEC-036).
 
 Weights are starting values to be tuned on synthetic fixtures and discussed with an organizer. Omitted factors are re-normalized. The baseline for comparison is first-come-first-served. The final decision belongs to the student and the organizer.
 
@@ -318,6 +319,9 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | Organizer tries to set eligibility criteria  | Server rejects (BR-14)                                       |
 | Dean approval pending when the mission fills | Pending request keeps its slot; others get a full response   |
 | Dean rejects a pending student               | Slot freed; no watering or certificate                       |
+| Student has no declared availability          | Still recommended, marked as availability unknown; asked to confirm before accepting |
+| Student's availability covers only part of a mission | Not recommended for that mission; may still accept it if eligible      |
+| Dean-rejected student tries the same mission again | Rejected (ALREADY_REJECTED); not recommended again                      |
 | Student lowers their CGPA or changes school after accepting | Assignment kept; change audited with the old value |
 | Admin edits criteria after a student accepted | Server rejects (BR-14)                                      |
 
@@ -347,7 +351,7 @@ Seed: eight synthetic students (mixed schools and CGPAs, including one with no C
 
 3.  (Minute 3 to 4) Organizer pastes a messy announcement; the LLM drafts a mission; the organizer edits and publishes. Presenter C.
 
-4.  (Minute 4 to 5) Recommended students appear with Why recommended; a conflicting and an unqualified student are excluded; an organizer override is logged. A second mission, posted by the admin for one school with a minimum CGPA, is visible to an eligible student and hidden from an ineligible one. Presenter B.
+4.  (Minute 4 to 5) Recommended students appear with Why recommended; a conflicting student, an unavailable student and a student who fails the school or CGPA criteria are excluded; an organizer override is logged. A second mission, posted by the admin for one school with a minimum CGPA, is visible to an eligible student and hidden from an ineligible one. Presenter B.
 
 5.  (Minute 5 to 6) Four students accept; a fifth concurrent request cannot exceed capacity. On the dean-approval mission, an accepting student shows as pending, and the admin records the dean's approval. Presenter C.
 

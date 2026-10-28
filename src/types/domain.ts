@@ -15,16 +15,25 @@ export interface TimeWindow {
   end: ISODateTime;
 }
 
-/** A mission the student has already accepted, used for time-conflict checks. */
+/**
+ * One of the student's mission assignments, in any status (DEC-025, DEC-036).
+ * Any status on the same mission excludes the student (ALREADY_ASSIGNED; unique student+mission).
+ * Only PENDING_DEAN_APPROVAL and ACCEPTED count for time conflicts, the same as accept_mission.
+ */
 export interface Commitment {
   missionId: string;
   window: TimeWindow;
+  status: "PENDING_DEAN_APPROVAL" | "ACCEPTED" | "DEAN_REJECTED";
 }
 
 export interface Student {
   id: string;
   displayName: string;
   skills: string[];
+  /**
+   * Declared availability. An empty array means "unknown" (never entered; the DB default is '[]'):
+   * the student stays provisionally eligible and is asked to confirm before accepting (DEC-036).
+   */
   availability: TimeWindow[];
   matchingOptOut: boolean;
   school: School;
@@ -33,7 +42,7 @@ export interface Student {
    * Used only by the Stage 1 eligibility filter, never by the score (BR-15).
    */
   cgpa: number | null;
-  /** Approved participations in the look-back window (FR-024). */
+  /** All of the student's approved participations, all time (FR-024, DEC-036). */
   recentOpportunities: number;
   /** 0..1. null means a new student, who gets the neutral default (cold start). */
   reliability: number | null;
@@ -63,9 +72,9 @@ export interface Mission {
   deanApprovalRequired: boolean;
 }
 
+/** Score factors (SRS §10, DEC-036). Availability is a Stage 1 filter, not a factor. */
 export type FactorName =
   | "skill"
-  | "availability"
   | "opportunityBalance"
   | "proximity"
   | "reliability";
@@ -88,12 +97,22 @@ export interface Recommendation {
   /** Sum of factor contributions, 0..1. */
   score: number;
   factors: Factor[];
+  /**
+   * "FULL": declared availability covers the whole mission.
+   * "UNKNOWN": no availability declared; the screen asks the student to confirm before accepting.
+   * Never affects the score (DEC-036).
+   */
+  availability: "FULL" | "UNKNOWN";
   algorithmVersion: string;
 }
 
 export type ExclusionReason =
+  /** An assignment for this same mission exists, in any status. */
+  | "ALREADY_ASSIGNED"
+  /** Overlaps a PENDING_DEAN_APPROVAL or ACCEPTED assignment on another mission. */
   | "TIME_CONFLICT"
-  | "MISSING_ELIGIBILITY"
+  /** Availability is declared but does not cover the whole mission window. Empty availability is not excluded. */
+  | "NOT_AVAILABLE"
   | "SCHOOL_NOT_ELIGIBLE"
   /** Also used when a minimum is set and the student has no declared CGPA. */
   | "CGPA_BELOW_MINIMUM"

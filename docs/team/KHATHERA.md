@@ -76,23 +76,30 @@ Check that Elias's Phase 0 work is on `main`: `package.json` with vitest and pdf
 
 Wait for `src/types/domain.ts` and use only its types.
 
-1. **Stage 1, filters.** Exclude students with a time conflict, missing required eligibility, a school not in `mission.eligibleSchools` (empty means all), a CGPA below `mission.minCgpa` or no CGPA when a minimum is set (FR-029, DEC-016), a matching opt-out (FR-025), or a full mission. Each excluded student carries the reason.
+1. **Stage 1, filters.** Match only PUBLISHED missions. Exclude students with an assignment for the same mission in any status (`ALREADY_ASSIGNED`), a time conflict with a PENDING_DEAN_APPROVAL or ACCEPTED assignment on another mission, declared availability that does not cover the whole mission (`NOT_AVAILABLE`; an empty availability list counts as unknown and is not excluded), a school not in `mission.eligibleSchools` (empty means all), a CGPA below `mission.minCgpa` or no CGPA when a minimum is set (FR-029, DEC-016), a matching opt-out (FR-025), or a full mission. Each excluded student carries the reason. Required skills are not a filter; they count only in the skill-alignment score. Dean approval does not affect matching. Each recommendation reports `availability: "FULL" | "UNKNOWN"` (DEC-036).
 2. **Stage 2, transparent weighted score.** Starting weights from SRS §10:
 
    | Factor | Weight |
    |---|---|
-   | Skill alignment | 35% |
-   | Availability fit | 30% |
-   | Opportunity balance (fewer past participations scores higher) | 20% |
-   | Optional proximity | 10% |
-   | Verified reliability, with a neutral default for new students | 5% |
+   | Skill alignment | 50% (35/70) |
+   | Opportunity balance (fewer past participations scores higher) | 28.6% (20/70) |
+   | Optional proximity | 14.3% (10/70) |
+   | Verified reliability, with a neutral default for new students | 7.1% (5/70) |
+
+   Availability is a Stage 1 filter for recommendations only, never a score factor (DEC-036). `recentOpportunities` counts all approved participations, all time; the API computes it.
 
    Omitted factors are re-normalized. Keep the weights as named constants in one place.
 3. **"Why recommended."** Every recommendation lists each factor and its contribution.
 4. **Determinism.** The same input always gives the same order, with a fixed tie-break.
-5. **Never use** grades, gender, nationality, religion or any other sensitive attribute in the score (NFR-09). CGPA is used only in the Stage 1 filter, never in Stage 2 (BR-15).
+5. **Never use** grades, gender, nationality, religion or any other sensitive attribute in the score (NFR-09). CGPA is used only in the Stage 1 filter, never in Stage 2 (BR-15). Availability is never in Stage 2 either (DEC-036).
 6. Tests on fixed fixtures:
-   - a conflicting student, an unqualified student and an opted-out student are excluded
+   - a conflicting student, an already-assigned student (pending, accepted and dean-rejected) and an opted-out student are excluded
+   - a dean-rejected assignment on another mission causes no time conflict
+   - availability: full coverage passes (`FULL`); partial coverage is excluded (`NOT_AVAILABLE`); touching windows that together cover the mission pass; a new student with empty availability is recommended as `UNKNOWN`
+   - availability (full or unknown) does not change the score
+   - a student with none of the required skills is still recommended, with a lower skill score
+   - the four weights add up to 1, with and without proximity
+   - a non-published mission throws in `matchStudentsToMission` and is skipped in `recommendMissionsForStudent`
    - a student from a non-listed school, a student below the minimum CGPA and a student with no CGPA are excluded from a gated mission; a CGPA equal to the minimum is eligible
    - raising an eligible student's CGPA does not change their score
    - a new student still appears in recommendations
@@ -120,3 +127,5 @@ Wait for `src/types/domain.ts` and use only its types.
 ## Hand-off
 
 Elias's screens import these functions. Do not change a function's name or inputs once its pull request is merged without asking first.
+
+Matching exports `matchStudentsToMission(mission, students): MatchResult` (organizer view) and `recommendMissionsForStudent(student, missions): Recommendation[]` (`GET /missions/recommended`; missions the student is excluded from are hidden).

@@ -56,7 +56,14 @@ As each of her pull requests merges, wire it in:
 
 - tree → student page
 - certificate → approval flow
-- matching → recommendations screen
+- matching → recommendations screen (DEC-036):
+  - Build `Student.commitments` from **every** `mission_assignments` row for the student (all three statuses), using the mission's `starts_at`/`ends_at` as `window`.
+  - Build `Student.availability` from `student_profiles.availability` (`[]` means unknown).
+  - Build `Student.recentOpportunities` from all of the student's approved participations, all time.
+  - Pass only PUBLISHED, upcoming missions. Matching has no clock.
+  - When a recommendation has `availability: "UNKNOWN"`, ask the student to confirm they're free for the whole mission before calling `accept_mission`. Don't add an availability check to `accept_mission`. It keeps enforcing eligibility, duplicate assignment, overlap and capacity.
+  - Show "Dean approval required" from `mission.deanApprovalRequired`. It isn't part of the score or the factors.
+  - Suggestion, for CGPA privacy (BR-15, FR-028): on organizer screens, show `SCHOOL_NOT_ELIGIBLE` and `CGPA_BELOW_MINIMUM` as one label, "Not eligible for this mission". Matching never outputs a CGPA value.
 - evaluation → README and baseline page
 
 ### Task 5 — Phase 6 ship
