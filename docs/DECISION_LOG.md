@@ -228,3 +228,35 @@ Rules:
 - Reason: Smallest schema that meets the Phase 1 exit check; keeps PDFs reproducible from data and keeps secrets out of the public repo.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-026 — Landing page, desktop-first staff screens, one-tap demo sign-in
+- Date: 2026-10-28
+- Change: (1) none → a public one-page landing page before sign-in (hero, how it works in 3 steps, fairness and privacy, prototype disclaimer); (2) all screens mobile-first → students stay mobile-first, organizer and admin screens are desktop-first (sidebar, tables) and still usable on a phone; (3) email and password only → the sign-in page also offers one-tap demo sign-in as the seeded student, organizer or admin. The server signs in with DEMO_PASSWORD, which never reaches the browser, and the buttons appear only in demo mode. Not adopted for now: 2-step onboarding, tree "growth moment" with 4 tabs, pre-accept warnings and feedback states.
+- Affects: SRS FR-001, §14 demo script. PRD §6. Phase 2 screen list (Figma "Voluntree — Phase 2 Wireframes", page "Wireframes v2").
+- Reason: The landing page explains the product to judges in seconds; staff work at desks; one-tap sign-in avoids typing passwords during the live demo.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-027 — Small admin overview moved into Phase 2
+- Date: 2026-10-28
+- Change: FR-015 Admin Dashboard was entirely a Should (Phase 7) → part of it moves into Phase 2: the admin home becomes an "Overview" with 4 counters (missions published, slots filled on open missions, dean approvals waiting, participations approved), a fairness chart of how many students have 0, 1–2, 3–5 and 6+ opportunities (counts only, no names), the share of gated missions, and the last 5 audit events. The full audit browser, filters and exports stay in Phase 7. The organizer home keeps only its counters; FR-014 stays a Should.
+- Affects: SRS FR-015, FR-024, FR-026. PRD §6. `AGENTS.md` §5 Phase 2. Figma wireframe screen 15.
+- Reason: Makes fairness visible to judges with data the Phase 1 database already holds; aggregates only, so BR-13 and BR-15 are kept.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-028 — Playful, minimal student screens; landing page that intrigues
+- Date: 2026-10-28
+- Change: (1) student screens showed full detail (skills, capacity bars, serials, long notices) → playful and minimal: one idea per screen, big rounded buttons, emoji, short copy, details behind a "More info" link. The consent screen keeps every FR-025 point, one line each. School is picked from big tiles. The tree screen shows water drops instead of numbers. (2) The DEC-026 landing page (hero, how it works, fairness and privacy cards) → one headline ("Show up. Grow something."), one button, and the tree growing seed to full; no explanatory sections. The prototype disclaimer stays. Organizer and admin screens are unchanged.
+- Affects: Phase 2 wireframes (Figma "Wireframes — final"), screens 0 and 2–8. SRS FR-025 wording on screen (content unchanged). NFR-05 kept: statuses use emoji and words, not colour alone.
+- Reason: Students should not feel overwhelmed; the landing page should spark interest rather than explain.
+- Decided by: Elias
+- Supersedes: DEC-026 item (1) landing page content
+
+### DEC-029 — Wireframe improvements: gaps, delight, demo flow, staff and quality
+- Date: 2026-10-28
+- Change: Added to the Phase 2 wireframes: (1) a student "Me" screen (school, CGPA, matching opt-out switch, sign out); (2) a card-icon picker and auto-shortened card titles in the mission form; (3) a "seed planted" step at the end of onboarding; (4) a growth celebration when a watering crosses a tree stage, and a small "+1" toast otherwise; (5) an "approved, +1 watering" banner on the next app open, which covers the demo-step-6 notification while the FR-012 inbox stays a Should; (6) friendly empty states; (7) a demo-only "Switch demo user" menu on staff screens, extending DEC-026; (8) "Try the demo" on the landing page; (9) a phone version of attendance review with Present/Absent buttons and "Approve all present"; (10) design rules: every icon labelled, contrast at least 4.5:1, touch targets at least 44px, motion respects reduce-motion. Emoji replaced by placeholder line icons (final icon set chosen in the visual design); tree visuals use the real `public/tree/` SVGs.
+- Affects: Figma "Wireframes — final" (screens 0, 3b, 4, 4b, 7b, 10, 11, 11m, 16 and every staff sidebar). SRS FR-001, FR-008, FR-012 (partial), FR-025, FR-027, FR-028, NFR-05. Mission data gains a card icon (column to add in Phase 2 build).
+- Reason: Approved by Elias to close screen gaps, make the student experience rewarding, and make the live demo faster.
+- Decided by: Elias
+- Supersedes: none
