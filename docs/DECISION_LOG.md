@@ -204,3 +204,27 @@ Rules:
 - Reason: Students move from CFGS or LC into a degree school.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-023 — Certificates in English only
+- Date: 2026-10-28
+- Change: certificate text language unspecified → certificates are English only. The generator uses the standard PDF fonts (Latin characters; Western European accents such as é and ü also print). Names or titles in other scripts, such as Arabic, are rejected with an error. No `@pdf-lib/fontkit` and no embedded font file. Control characters (tabs, line breaks) in certificate fields are rejected, not converted to spaces.
+- Affects: SRS FR-010. `src/lib/certificate/` (as merged in PR #4). `AGENTS.md` §3.
+- Reason: Keeps the certificate module dependency-free for the Oct 29 build; AIU coursework and demo data are in English.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-024 — Design step added to Phase 2
+- Date: 2026-10-28
+- Change: Phase 2 started with "Screen list agreed with the owner first", then building → Phase 2 runs in four steps, each approved by Elias before the next: (1) screen list, (2) low-fidelity wireframes in Figma, (3) workflow and UI/UX design (user flows and visual design) in Figma, (4) build the screens from the approved design. Steps 1 to 3 are design work and may run alongside Phase 1; building starts only after the Phase 1 exit check.
+- Affects: `AGENTS.md` §5 Phase 2. SRS §15 role "frontend and UX".
+- Reason: The plan had no UI/UX step and no wireframes; the screens are what the judges see in the demo.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-025 — Phase 1 data model details
+- Date: 2026-10-28
+- Change: SRS §7 implemented as 9 tables in `supabase/migrations/`, with these details: (1) `recommendations` and `override_logs` are created in Phase 3, `ai_usage_logs` in Phase 4, `notifications` only with FR-012; (2) certificate PDFs are not stored: the PDF is rebuilt from the certificate row on download, so Certificate has no pdf_path; (3) Completion status is APPROVED, REJECTED or REVOKED, and its reviewer column is `reviewed_by`, since it also records rejections; (4) assignment states for the Oct 29 build are PENDING_DEAN_APPROVAL, ACCEPTED and DEAN_REJECTED, with attendance approval held in completions; (5) added functions `reject_completion` (FR-008) and `get_certificate_for_download` (FR-010 download check); (6) `accept_mission` rejects a mission that overlaps one the student already holds (SRS §12); (7) demo logins share one password kept only in `.env.local` as DEMO_PASSWORD, because the repository is public; (8) database tests run with vitest against the Supabase project, using separate test logins and a test organization.
+- Affects: SRS §7, §8, §12, §13, FR-008, FR-010. `AGENTS.md` §5 Phase 1, §7.
+- Reason: Smallest schema that meets the Phase 1 exit check; keeps PDFs reproducible from data and keeps secrets out of the public repo.
+- Decided by: Elias
+- Supersedes: none
