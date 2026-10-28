@@ -380,3 +380,11 @@ Rules:
 - Reason: Approved by Elias; the demo must show only the seeded demo missions and people.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-045 — Baseline evaluation setup
+- Date: 2026-10-29
+- Change: none → FR-026 evaluation in `scripts/evaluate/` (Khathera Task 4, PR #11): seed 20261028, 100 synthetic students, 20 missions (5 gated), interest probability 0.35, uneven history (40/30/20/10%), FCFS-random as the primary baseline and a capped FCFS-engaged sensitivity check, 10 extra seeds and an equal-history scenario; assumptions A1–A6 in `scripts/evaluate/README.md`. Run with `npm run evaluate` (`tsx` added as a dev dependency). `.gitattributes` keeps `results.md` at LF line endings so the up-to-date check passes on Windows checkouts. The main README links the evaluation in Phase 6.
+- Affects: FR-026; `scripts/evaluate/`; `package.json`, lockfile, `.gitattributes`; README (Phase 6).
+- Reason: Fairness-first, reproducible comparison using the unchanged DEC-036 engine.
+- Decided by: Khathera (evaluation module), confirmed by Elias
+- Supersedes: none

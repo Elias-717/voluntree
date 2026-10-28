@@ -2,6 +2,7 @@
 
 // Student onboarding: consent (FR-025), then school, CGPA and phone (FR-028, DEC-040).
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { School } from "@/types/domain";
 import { createClient } from "@/lib/db/server";
@@ -44,5 +45,32 @@ export async function saveSchool(_state: string | null, form: FormData): Promise
     })
     .eq("user_id", me.id);
   if (error) return "Couldn't save. Please try again.";
-  redirect("/student/planted");
+  // From Me, go back to Me; during onboarding, on to the seed screen.
+  redirect(form.get("back") === "me" ? "/student/me" : "/student/planted");
+}
+
+/** The "Suggest missions for me" switch in Me: the same consent record, with the new choice (FR-025). */
+export async function setSuggestions(on: boolean) {
+  await requireRole("student");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("record_consent", { p_version: CONSENT_VERSION, p_opt_out: !on });
+  if (error) throw new Error(error.message);
+  revalidatePath("/student", "layout");
+}
+
+// accept_mission enforces capacity, eligibility, overlap and duplicates (FR-006, FR-029, FR-030).
+const ACCEPT_ERRORS: Record<string, string> = {
+  MISSION_FULL: "All spots were just taken.",
+  TIME_CONFLICT: "This overlaps another mission you joined.",
+  NOT_ELIGIBLE: "This mission isn't open to you.",
+  NOT_PUBLISHED: "This mission is no longer open.",
+  ALREADY_REJECTED: "The dean didn't approve this one, so you can't join it again.",
+};
+
+export async function acceptMission(missionId: string): Promise<string | null> {
+  await requireRole("student");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("accept_mission", { p_mission_id: missionId });
+  if (error) return ACCEPT_ERRORS[error.message.split(":")[0]] ?? "Couldn't join. Please try again.";
+  redirect("/student/missions?joined=1");
 }

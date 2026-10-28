@@ -13,11 +13,19 @@ const SCHOOLS: { code: School; Icon: typeof ChartBar }[] = [
   { code: "LC", Icon: ChatCircle },
 ];
 
-export function SchoolForm({ school, cgpa, phone }: { school: School | null; cgpa: number | null; phone: string | null }) {
+interface Props {
+  school: School | null;
+  cgpa: number | null;
+  phone: string | null;
+  fromMe: boolean;
+}
+
+export function SchoolForm({ school, cgpa, phone, fromMe }: Props) {
   const [error, formAction, pending] = useActionState(saveSchool, null);
 
   return (
     <form action={formAction} className="mt-6 flex flex-1 flex-col">
+      {fromMe && <input type="hidden" name="back" value="me" />}
       <fieldset className="grid grid-cols-2 gap-3">
         <legend className="sr-only">School</legend>
         {SCHOOLS.map(({ code, Icon }) => (
