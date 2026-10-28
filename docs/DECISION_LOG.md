@@ -324,3 +324,19 @@ Rules:
 - Reason: Elias found 12 segments unclear; a gauge that matches exactly the waterings needed next is easier to read.
 - Decided by: Elias
 - Supersedes: DEC-035 item (1) only
+
+### DEC-038 — Demo missions and staff names; final landing page
+- Date: 2026-10-28
+- Change: (1) Demo missions shown in the designs → New Student Arrival Welcome, Building D Cleaning Help, Red Cross Kedah Flood Aid, Alor Setar Library Renovation, Hari Raya Food Serving (synthetic; dates illustrative). (2) Staff demo names → Madam Fazilah, Madam Nadya and Mr Zulkiffli, replacing Hakim Zulkifli and Nadia Karim in the designs; their roles are proposed as Madam Fazilah organizer, Madam Nadya admin, Mr Zulkiffli second organizer, pending Elias's confirmation. (3) Final landing page (desktop 1440 and phone, light and dark): headline "Show up. Grow something.", a short lead line, Start growing and Try the demo, "Fair by design · Private by default", Khathera's full tree in a light-green circle with floating mission and reward chips, and a "Happening around AIU" strip of the five missions; replaces the earlier phone landing. The database seed is not changed by this entry.
+- Affects: Figma Screens page (landing frames), later staff screens and sign-in names; SRS §14 demo script wording when the seed is updated (separate approval).
+- Reason: Elias wants realistic, local example missions and names, and a landing page that is interesting rather than informative.
+- Decided by: Elias
+- Supersedes: DEC-028 item (2) landing layout (headline idea kept)
+
+### DEC-039 — AI drafts the mission description
+- Date: 2026-10-28
+- Change: FR-023 draft fields "title, skills, time, capacity" → the LLM also drafts a short, cleaned-up mission description from the pasted announcement. The organizer reviews and edits it like every other drafted field before publishing. If the announcement gives too little to describe the mission, the description is left blank and flagged, not invented. A mission still cannot be published without a description (FR-004).
+- Affects: SRS FR-023; Phase 4 Gemini prompt and Zod schema; Phase 2 mission form (description field, AI-generated label); `src/types/domain.ts` Mission gains `description` when the mission screens are built (separate approval).
+- Reason: Organizers get a ready-to-edit description instead of a blank field or a messy pasted announcement, while the human-in-the-loop rule stays unchanged.
+- Decided by: Elias
+- Supersedes: none
