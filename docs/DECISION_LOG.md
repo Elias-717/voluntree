@@ -260,3 +260,59 @@ Rules:
 - Reason: Approved by Elias to close screen gaps, make the student experience rewarding, and make the live demo faster.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-030 — Visual style: Garden, Phosphor icons, Khathera's trees unchanged
+- Date: 2026-10-28
+- Change: no visual style → direction "A. Garden": cream background #FBF7EF, forest green #2E7D32 (the tree's own green), leaf tint #EAF3E2, water blue #4A9FD8, sun yellow #F2C14E, ink #23301F; Fraunces for headings and DM Sans for text; pill buttons, rounded cards (about 22px), soft shadows. Staff screens use the same palette on white with smaller radii and denser layouts. Icons: Phosphor (regular, with fill for active states). Tree art: Khathera's `public/tree/` SVGs unchanged. Directions B (Pop) and C (Calm) were not chosen.
+- Affects: Phase 2 visual design (Figma "Style directions" page and the screens to come), NFR-05 (contrast checked on the final palette). The Phosphor React package will be a new dependency at build time, to be confirmed by Elias then.
+- Reason: Warm and inviting for students, calm enough for staff and judges, and the green matches the tree so the tree stays the hero.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-031 — Light and dark mode
+- Date: 2026-10-28
+- Change: light only → an Appearance setting with System (default, follows the device), Light and Dark. Students set it in Me; staff in the user menu at the bottom of the sidebar; the landing page follows the device. The choice is saved on the device (no database change). Dark Garden palette: background #131A13, card #1E271D, primary #6CC070 with dark text on buttons, tint #263A22, water #6DB7EA, text #ECE9DF. Tree art unchanged in both modes.
+- Affects: Phase 2 visual design (Figma "Style directions" page, design kit and every screen in both modes), screen 16 (Me), staff sidebar, NFR-05 (contrast checked in both modes).
+- Reason: Requested by Elias; common student expectation, and comfortable for evening use.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-032 — Earth palette: green, light green, brown, black, white
+- Date: 2026-10-28
+- Change: Garden palette (cream background, forest green, water blue, sun yellow) → five colours only, no cream, no blue, no yellow. Light: background #FFFFFF, green (main) #4E7A3E, light green #DDEBCF, card #F3F7EE, brown #7A4E2D, black text #1C1C1A. Dark: background #121411, green #8DBB6E with dark text on buttons, light green #2A3524, card #1D211B, brown #B07A52, text #F1F1EC. Green is used for buttons, the active tab, banners, water drops and "you're in"; light green for cards, chips and the tree glow; brown for some mission icons, "spots left" and waiting tags; black for text and outlined buttons. Fonts (Fraunces, DM Sans), shapes, Phosphor icons, the Appearance setting and the tree art are unchanged.
+- Affects: Phase 2 visual design (Figma "Style directions" page, board "Earth palette — light and dark"), NFR-05 contrast checks.
+- Reason: Blue and yellow made the screens feel scattered; a smaller earthy palette is calmer and keeps the tree as the hero.
+- Decided by: Elias
+- Supersedes: DEC-030 (colour values only), DEC-031 (dark colour values only)
+
+### DEC-033 — Flat colours only: no glows, gradients or shadows
+- Date: 2026-10-28
+- Change: the tree sat on a soft radial glow, and DEC-030 allowed soft shadows → no glowing effects, gradients or drop shadows anywhere, in light or dark mode. The tree sits on a flat card-coloured panel (#F3F7EE light, #1D211B dark); cards are flat fills.
+- Affects: Phase 2 visual design (Figma "Earth palette" board and every screen to come), the growth celebration and landing page animations (motion only, no glow).
+- Reason: Requested by Elias; a flat look is calmer and matches the flat tree drawings.
+- Decided by: Elias
+- Supersedes: DEC-030 (soft shadows only)
+
+### DEC-034 — Layered surfaces and a green header band
+- Date: 2026-10-28
+- Change: plain white page with pale green cards → layered surfaces: light-mode page #EEF2EA (cool sage-grey, not cream) with white cards and a hairline border (#E3E8DD); a solid deep-green header band (#2F5D2A light, #22391F dark) on the student home, My tree and staff page headers, with the first card overlapping its edge. Dark mode keeps its layered near-black page and lighter cards. Still flat (DEC-033) and within the DEC-032 colours. Green text is used on white cards, not directly on the sage-grey page (4.43:1 there).
+- Affects: Phase 2 visual design: Figma variables color/bg/page, color/bg/card, color/border/default; new color/bg/header, color/text/on-header, color/text/on-header-muted; Mission card component border.
+- Reason: The plain white background looked generic; layering plus a branded header feels designed and professional, following the layered-surface pattern common in Meta's apps.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-035 — Inspiration-driven layout: watering gauge, black tab bar, sans headings, no white
+- Date: 2026-10-28
+- Change: Following Elias's reference (a nutrition-tracking app layout), using only the DEC-032 colours: (1) the student home's hero is a watering gauge: 12 radial pills in 4 groups of 3 (one group per tree stage), filled in green up to the student's watering count, with the tree, the count and "N more to <next stage>" in the middle; (2) the student tab bar becomes a black bar with rounded top corners, icons only (each with a screen-reader label), and My tree as a green rounded-square centre button; (3) round icon buttons in the top corners with a small centred title; (4) mission cards show an icon avatar, title and time, a large "spots left" number, a row of small facts (place, skill, who can join) and a round green arrow button; (5) headings move from Fraunces to DM Sans SemiBold with tight letter spacing (Display/Hero, Heading/Screen, Heading/Section; new Display/Number); (6) light mode avoids pure white: cards, tab-bar icons and light text use sage tints (#F4F7EF on #E9EFE3), all pairs at least 4.5:1. Kept: flat (no shadows or glows, DEC-033) and no orange or other off-palette colours.
+- Affects: Figma Design kit (text styles; new colour variables color/bg/navbar, color/text/on-nav, color/gauge/empty, color/gauge/filled; card, nav, on-primary and on-header now sage), Screens page sample "Student Home" (light and dark, bound to variables). Supersedes the Fraunces headings in DEC-030. The DEC-034 green header band is not used on this home layout; to be confirmed by Elias for other screens.
+- Reason: Elias wants the feel of the reference: friendly, modern, data-forward, with one clear hero metric.
+- Decided by: Elias
+- Supersedes: DEC-030 (heading font only)
+
+### DEC-036 — Matching filters, assignment statuses, availability and score weights
+- Date: 2026-10-28
+- Change: (1) "missing required eligibility" / "unqualified" → failing the school or minimum-CGPA criteria (FR-029); required skills are not a hard filter and count only in the skill-alignment factor; MISSING_ELIGIBILITY removed from ExclusionReason. (2) none → a student with an assignment for the same mission in any status (PENDING_DEAN_APPROVAL, ACCEPTED, DEAN_REJECTED) is excluded from recommendations as ALREADY_ASSIGNED, following the unique student+mission rule; only PENDING_DEAN_APPROVAL and ACCEPTED on another mission count as time conflicts, as in accept_mission; pending and accepted assignments both hold capacity; Commitment gains status. (3) none → only PUBLISHED missions are matched; matchStudentsToMission rejects other statuses, recommendMissionsForStudent skips them. (4) Dean approval does not affect matching; screens show it from Mission.deanApprovalRequired. (5) availability fit as a 30% score factor → a Stage 1 filter for recommendations only: declared availability that does not fully cover the mission window is excluded as NOT_AVAILABLE; touching windows merge; an empty availability list means unknown, is not excluded, and is reported as Recommendation.availability = "UNKNOWN" (otherwise "FULL"). (6) Score weights 35/30/20/10/5 → availability removed from the score and its 30% redistributed proportionally: skill 35/70 (50%), opportunity balance 20/70 (28.6%), proximity 10/70 (14.3%), reliability 5/70 (7.1%), computed from the base values 35, 20, 10 and 5 divided by the total of the factors that apply; FactorName loses "availability". Availability, CGPA and dean approval never change the score. (7) Students with unknown availability are asked on screen to confirm they are free for the whole mission before accepting; accept_mission gains no availability check and remains responsible for eligibility, duplicate assignment, overlap and capacity. (8) "approved participations in the look-back window" → recentOpportunities counts all of the student's approved participations, all time; the API computes it. (9) A dean rejection is final for that mission for the Oct 29 build (accept_mission returns ALREADY_REJECTED; no reapply or admin undo); recorded as an SRS §12 edge case.
+- Affects: SRS FR-007, FR-025 (consent wording), §9 data minimization, §10 Stage 1 and weights table, §12 edge cases, §14 step 4. `AGENTS.md` §3, §5 Phase 3 exit check, §6 Q5, §7. `docs/team/KHATHERA.md` Task 3 and Hand-off. `docs/team/ELIAS.md` Task 4. `src/types/domain.ts` (Student.availability and recentOpportunities comments, Commitment.status, FactorName, Recommendation.availability, ExclusionReason). No database change.
+- Reason: Khathera's Task 3 review: removes the ambiguity between skills and eligibility; never recommends a student whom accept_mission would refuse; keeps matching consistent with the Phase 1 schema and functions; recommends only students who can attend the whole mission without hiding new students who have not entered availability (DB default '[]', open question 5); once availability is a filter it cannot distinguish ranked students, so its weight is redistributed proportionally to keep the other factors' relative importance. All-time opportunities is the simplest look-back rule to explain. Proposed by Khathera as DEC-034; renumbered because DEC-034 and DEC-035 were already used by visual design entries.
+- Decided by: Khathera (matching module), confirmed by Elias
+- Supersedes: SRS §10 starting weights (availability fit 30%)
