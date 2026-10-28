@@ -144,6 +144,7 @@ Ask the owner about these when they become relevant. Do not decide them yourself
 9. Is the organizer a primary or a secondary user? The SRS and PRD disagree.
 10. The SRS header says "2-week build", while the plan says 2 days.
 11. Resolved (DEC-022): students can change their school any time, audited like CGPA.
+12. Stretch idea (parked 2026-10-28): let an admin change the certificate design, possibly with an AI suggestion. Options discussed: (B) the admin picks from 2 or 3 preset pdf-lib designs; (C) B plus Gemini suggesting a preset and colour, which extends "the LLM drafts missions only" and needs a decision log entry. Open: per mission or app-wide, and whether already-issued certificates are restyled. Affects Khathera's certificate module. Revisit in Phase 7 only.
 
 ## 7. Current status
 

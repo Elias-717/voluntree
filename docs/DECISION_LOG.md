@@ -327,7 +327,7 @@ Rules:
 
 ### DEC-038 — Demo missions and staff names; final landing page
 - Date: 2026-10-28
-- Change: (1) Demo missions shown in the designs → New Student Arrival Welcome, Building D Cleaning Help, Red Cross Kedah Flood Aid, Alor Setar Library Renovation, Hari Raya Food Serving (synthetic; dates illustrative). (2) Staff demo names → Madam Fazilah, Madam Nadya and Mr Zulkiffli, replacing Hakim Zulkifli and Nadia Karim in the designs; their roles are proposed as Madam Fazilah organizer, Madam Nadya admin, Mr Zulkiffli second organizer, pending Elias's confirmation. (3) Final landing page (desktop 1440 and phone, light and dark): headline "Show up. Grow something.", a short lead line, Start growing and Try the demo, "Fair by design · Private by default", Khathera's full tree in a light-green circle with floating mission and reward chips, and a "Happening around AIU" strip of the five missions; replaces the earlier phone landing. The database seed is not changed by this entry.
+- Change: (1) Demo missions shown in the designs → New Student Arrival Welcome, Building D Cleaning Help, Red Cross Kedah Flood Aid, Alor Setar Library Renovation, Hari Raya Food Serving (synthetic; dates illustrative). (2) Staff demo names → Madam Fazilah, Madam Nadya and Mr Zulkiffli, replacing Hakim Zulkifli and Nadia Karim in the designs; they are prototype names only, with no fixed roles (confirmed by Elias). (3) Final landing page (desktop 1440 and phone, light and dark): headline "Show up. Grow something.", a short lead line, Start growing and Try the demo, "Fair by design · Private by default", Khathera's full tree in a light-green circle with floating mission and reward chips, and a "Happening around AIU" strip of the five missions; replaces the earlier phone landing. The database seed is not changed by this entry.
 - Affects: Figma Screens page (landing frames), later staff screens and sign-in names; SRS §14 demo script wording when the seed is updated (separate approval).
 - Reason: Elias wants realistic, local example missions and names, and a landing page that is interesting rather than informative.
 - Decided by: Elias
@@ -338,5 +338,13 @@ Rules:
 - Change: FR-023 draft fields "title, skills, time, capacity" → the LLM also drafts a short, cleaned-up mission description from the pasted announcement. The organizer reviews and edits it like every other drafted field before publishing. If the announcement gives too little to describe the mission, the description is left blank and flagged, not invented. A mission still cannot be published without a description (FR-004).
 - Affects: SRS FR-023; Phase 4 Gemini prompt and Zod schema; Phase 2 mission form (description field, AI-generated label); `src/types/domain.ts` Mission gains `description` when the mission screens are built (separate approval).
 - Reason: Organizers get a ready-to-edit description instead of a blank field or a messy pasted announcement, while the human-in-the-loop rule stays unchanged.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-040 — Optional student phone number for mission contact
+- Date: 2026-10-28
+- Change: none → students may enter an optional phone number at registration and edit it in their profile, so organizers can contact them about a mission. Staff (organizers and admins) have no phone field. The number is visible only to the student, admins, and the organizer of a mission on which the student has a PENDING_DEAN_APPROVAL or ACCEPTED assignment; this is enforced with row-level security. A DEAN_REJECTED assignment gives no access. Seed data uses synthetic numbers only. Built in Phase 2.
+- Affects: new migration (phone column and RLS policy); Phase 2 registration and student profile screens; organizer mission roster; FR-025 consent screen wording; SRS §9 data minimization; `src/types/domain.ts` (Student gains an optional phone, separate approval when the screens are built); demo seed.
+- Reason: Organizers need a way to reach the students on their missions; keeping it optional and limited to assigned missions collects and shows as little personal data as possible.
 - Decided by: Elias
 - Supersedes: none
