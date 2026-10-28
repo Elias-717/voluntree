@@ -120,7 +120,7 @@ Each approved qualifying participation shall create exactly one watering entry i
 
 #### FR-010 \[M\] Automatic Certificate of Appreciation
 
-For each approved participation the system shall generate a PDF containing student name, mission title, date and a unique certificate ID. Acceptance: PDF downloads; re-request returns the same certificate record; approval is required first.
+For each approved participation the system shall generate a PDF containing student name, mission title, date and a unique certificate ID. If the approval is revoked (FR-009), the certificate record is kept, marked revoked and linked to the revocation entry; it can no longer be downloaded, and the student sees it as revoked. If the same participation is approved again, the same certificate record is reactivated with the same serial, never re-issued. Acceptance: PDF downloads; re-request returns the same certificate record; approval is required first; downloading a revoked certificate is rejected; re-approval after revocation reactivates the same serial.
 
 #### FR-011 \[M\] Real-Time Updates
 
@@ -225,7 +225,7 @@ Expiring one-use QR or check-in nonce; replay rejected; doubtful events flagged 
 | Recommendation    | id, mission_id, student_id, score, factors (JSON), algorithm_version                                       | Stored for explainability and audit                               |
 | Completion        | id, assignment_id, approved_by, status                                                                     | Unique approved completion per assignment                         |
 | WateringLedger    | id, user_id, completion_id, delta, reason, idempotency_key                                                 | Unique idempotency key; revocations are new entries with a reason |
-| Certificate       | id, completion_id, serial, pdf_path, template_version                                                      | Unique completion+template                                        |
+| Certificate       | id, completion_id, serial, pdf_path, template_version, status (valid or revoked), revocation_entry_id (nullable) | Unique completion+template; never deleted                   |
 | Notification      | id, user_id, type, payload, read_at                                                                        | Recipient only                                                    |
 | AiUsageLog        | id, feature, model, version, prompt_hash, created_at                                                       | Feeds the declaration form                                        |
 | OverrideLog       | id, actor_id, mission_id, reason                                                                           | Human override of AI ranking                                      |
@@ -304,6 +304,8 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | Two students accept the final spot at once   | One accepted; the other receives a full or waitlist response |
 | Overlapping mission                          | Rejected or flagged with explanation                         |
 | Organizer approves twice                     | One watering entry and one certificate                       |
+| Admin revokes an approval                    | Certificate marked revoked; download rejected                |
+| Revoked participation approved again         | Same certificate record reactivated, same serial             |
 | Certificate PDF generation fails             | Approval persists; retry without duplicates                  |
 | Student without history (cold start)         | Still recommended; no reliability penalty                    |
 | LLM drafts wrong or missing details          | Organizer must review; blanks are flagged, never invented    |
@@ -332,12 +334,12 @@ Weights are starting values to be tuned on synthetic fixtures and discussed with
 | POST /assignments/:id/dean-decision | Record the dean's approval or rejection | Admin                   |
 | POST /completions/:id/review   | Approve or reject attendance               | Organizer or admin        |
 | POST /completions/:id/revoke   | Revoke an approval with a logged reason    | Admin                     |
-| GET /certificates/:id/download | Download PDF                               | Owner or authorized staff |
+| GET /certificates/:id/download | Download PDF; rejected if revoked          | Owner or authorized staff |
 | GET /evaluation/baseline       | Baseline comparison results                | Admin or demo             |
 
 ## 14. Demo Script (Acceptance Gate and 10-Minute Pitch Flow)
 
-Seed: eight synthetic students (mixed schools and CGPAs, including one with no CGPA), one organizer, one administrator.
+Seed: eight synthetic students (mixed schools and CGPAs, including one with no CGPA), one organizer, one administrator. Students have varied past participation (for example 0, 0, 1, 2, 4, 6, 9 and 11 approved past missions), seeded as real completed missions with ledger entries and certificates, never as a pre-filled count. The demo student starts at 2 waterings, so the approval in step 6 grows their tree from seed to sprout. The varied history also drives the opportunity-balance factor shown in step 4.
 
 1.  (Minute 0 to 2) Problem and evidence: named users, survey or interview finding, measurable outcome. Presenter A.
 
@@ -349,7 +351,7 @@ Seed: eight synthetic students (mixed schools and CGPAs, including one with no C
 
 5.  (Minute 5 to 6) Four students accept; a fifth concurrent request cannot exceed capacity. On the dean-approval mission, an accepting student shows as pending, and the admin records the dean's approval. Presenter C.
 
-6.  (Minute 6 to 7) Organizer approves one participation; the student sees the notification, the watering count rises once, the student's tree grows, and a certificate PDF with a unique serial downloads. Presenter A.
+6.  (Minute 6 to 7) Organizer approves one participation; the presenter switches to that student's login (the tree is visible only to them, BR-13); the student sees the notification, the watering count rises once from 2 to 3, the student's tree grows from seed to sprout, and a certificate PDF with a unique serial downloads. Presenter A.
 
 7.  (Minute 7 to 8) Repeat the approval request; watering and certificate counts stay unchanged.
 

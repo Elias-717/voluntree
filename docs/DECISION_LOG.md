@@ -188,3 +188,11 @@ Rules:
 - Reason: Lowest-risk option for the Oct 29 build; adds no new assignment state. Gaming via CGPA edits is visible in the audit log and caught by dean approval where required.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-021 — Revoked certificates and demo seed history
+- Date: 2026-10-28
+- Change: (1) Open question 3 → when an approval is revoked, its certificate record is kept, marked revoked and linked to the revocation entry; download is rejected and the student sees it as revoked. A later re-approval of the same participation reactivates the same certificate and serial. Certificate gains status and revocation_entry_id. (2) Open question 4 → seed students with varied past participation (e.g. 0, 0, 1, 2, 4, 6, 9, 11) as real completed missions with ledger entries and certificates; the demo student starts at 2 waterings so step 6 grows the tree to sprout. Demo step 6 includes switching to that student's login (BR-13).
+- Affects: SRS FR-010, §7 Certificate, §12, §13, §14 seed and step 6. PRD §7. `AGENTS.md` §3, §5 Phase 1, §6 Q3 and Q4, §7.
+- Reason: (1) Keeps revocation meaningful without breaking the append-only audit (NFR-07) or the one-certificate-per-participation rule (FR-010, BR-07). (2) Makes tree growth visible in the demo and gives the opportunity-balance factor (FR-024) real variation to show.
+- Decided by: Elias
+- Supersedes: none

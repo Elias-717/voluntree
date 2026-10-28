@@ -95,7 +95,7 @@ Rule: if time runs out, cut stretch items first. Never cut the end-to-end journe
 
 ## 7. Critical Product Policies
 
-- Every verified volunteer receives one Certificate of Appreciation per qualifying mission, regardless of watering count or rank.
+- Every verified volunteer receives one Certificate of Appreciation per qualifying mission, regardless of watering count or rank. If the approval is revoked, the certificate is kept but marked revoked and can no longer be downloaded; a later re-approval reactivates the same certificate.
 
 - Waterings are lifetime, non-transferable and never spent.
 
