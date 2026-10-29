@@ -44,7 +44,7 @@ export default async function DeanApprovals() {
                 <th className="px-5 py-3 font-medium">Decision</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-line">
+            <tbody className="stagger divide-y divide-line">
               {rows.map((r) => {
                 const sp = r.profiles.student_profiles;
                 return (

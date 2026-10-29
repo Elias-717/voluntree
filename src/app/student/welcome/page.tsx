@@ -23,7 +23,7 @@ export default async function Welcome() {
         <br />a quick promise
       </h1>
 
-      <ul className="mt-6 flex flex-col gap-4">
+      <ul className="stagger mt-6 flex flex-col gap-4">
         {PROMISES.map(({ Icon, text }) => (
           <li key={text} className="flex gap-3">
             <span className="grid size-9 shrink-0 place-items-center rounded-full bg-tint text-on-tint">

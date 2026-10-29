@@ -40,7 +40,7 @@ export default async function FindMission({ searchParams }: PageProps<"/student/
       {shown.length === 0 ? (
         <p className="mt-3 text-sm text-muted">No missions found.</p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-3">
+        <ul className="stagger mt-3 flex flex-col gap-3">
           {shown.map(({ row, spotsLeft, recommendation }) => {
             const gated = row.eligible_schools.length > 0;
             return (

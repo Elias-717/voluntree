@@ -44,7 +44,7 @@ export default async function Approvals() {
               <th className="px-5 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="stagger divide-y divide-line">
             {rows.map((r) => {
               const a = r.mission_assignments;
               const cert = Array.isArray(r.certificates) ? r.certificates[0] : r.certificates;

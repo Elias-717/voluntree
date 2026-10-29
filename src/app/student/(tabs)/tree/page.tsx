@@ -8,7 +8,7 @@ import { requireRole } from "@/lib/db/session";
 import { loadWaterings } from "@/lib/db/student";
 import { getTreeStage, TREE_STAGES, WATERINGS_PER_STAGE } from "@/lib/tree/tree";
 
-const SHORT = ["Seed", "Sprout", "Sapling", "Young", "Full"];
+const SHORT = ["Seed", "Sprout", "Sapling", "Young palm", "Date palm"];
 
 export default async function MyTree() {
   const me = await requireRole("student");
@@ -31,12 +31,19 @@ export default async function MyTree() {
         {tree.wateringsToNextStage !== null ? ` · ${tree.wateringsToNextStage} more to ${next}` : " · fully grown"}
       </p>
 
-      <ol className="mt-6 grid grid-cols-5 text-center text-sm">
-        {SHORT.map((name, i) => (
-          <li key={name} className="flex flex-col items-center gap-1.5">
-            <span className={`size-3.5 rounded-full ${i <= current ? "bg-primary" : "bg-gauge-empty"}`} aria-hidden />
-            <span className={i === current ? "font-semibold" : "text-muted"}>{name}</span>
-            <span className="text-xs text-muted">{i * WATERINGS_PER_STAGE}</span>
+      {/* Growth journey (DEC-056): every stage in order; a gentle pop travels from Seed to Date palm and loops. */}
+      <ol className="mt-6 grid grid-cols-5 gap-1 text-center text-xs" aria-label="Growth journey">
+        {TREE_STAGES.map((stage, i) => (
+          <li key={stage} className="flex flex-col items-center gap-1" aria-current={i === current ? "step" : undefined}>
+            <span
+              className={`journey-step relative grid size-14 place-items-center rounded-full ${
+                i === current ? "bg-tint ring-2 ring-primary" : i < current ? "bg-tint" : "bg-card opacity-45"}`}
+              style={{ "--i": i } as React.CSSProperties}
+            >
+              <Image src={`/tree/${stage}.svg`} alt="" width={48} height={48} className="h-auto w-11" />
+            </span>
+            <span className={`leading-tight ${i === current ? "font-semibold" : "text-muted"}`}>{SHORT[i]}</span>
+            <span className="text-muted">{i === current ? "You are here" : i * WATERINGS_PER_STAGE}</span>
           </li>
         ))}
       </ol>

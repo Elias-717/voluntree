@@ -84,7 +84,7 @@ export default async function MyMissions({ searchParams }: PageProps<"/student/m
           <Link href="/student/find" className="mt-6 rounded-full bg-primary px-10 py-4 font-medium text-on-primary">Find a mission</Link>
         </div>
       ) : (
-        <ul className="mt-5 flex flex-col gap-3">
+        <ul className="stagger mt-5 flex flex-col gap-3">
           {shown.map((item) => {
             const b = BADGES[item.badge];
             return (

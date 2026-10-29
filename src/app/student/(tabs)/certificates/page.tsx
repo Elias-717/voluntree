@@ -41,7 +41,7 @@ export default async function Certificates() {
       {rows.length === 0 && (
         <p className="mt-4 text-center text-sm text-muted">Complete a mission to earn your first certificate.</p>
       )}
-      <ul className="mt-4 flex flex-col gap-3">
+      <ul className="stagger mt-4 flex flex-col gap-3">
         {rows.map((r) => {
           const mission = r.completions.mission_assignments.missions;
           const revoked = r.status === "REVOKED";

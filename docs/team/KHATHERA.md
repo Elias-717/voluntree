@@ -140,10 +140,16 @@ The tree becomes a palm across the app. Elias changed the landing page's 3D tree
    - fronds sway gently from where they meet the trunk (a few degrees, about 4 to 6 seconds a cycle, each frond a little out of step);
    - the seed and the spear leaf bob or lean slightly;
    - wrap the animation in `@media (prefers-reduced-motion: no-preference)` so it stops when the device asks for reduced motion.
-4. The stage names stay Seed, Sprout, Sapling, Young tree and Full tree. Don't change `src/lib/tree/tree.ts` unless you find a reason; ask first.
+4. The stage names stay Seed, Sprout, Sapling, Young tree and Full tree. (Later renamed Young palm and Date palm on the screens by Elias, DEC-053; stage keys unchanged.) Don't change `src/lib/tree/tree.ts` unless you find a reason; ask first.
 5. Check each stage on the student screens on a phone width, in light and dark mode.
 
 **Done when:** the 5 palm SVGs are merged, they sway on the student screens, they stay still with reduced motion on, and the tree tests still pass.
+
+### Task 6 — Evaluation of the live configuration (FR-026, DEC-048, DEC-050, DEC-054)
+
+Evaluate the live configuration (no skills, no declared availability, no reliability data) as the primary result, and keep the original simulation as a hypothetical future configuration. `npm run evaluate` regenerates both.
+
+**Done when:** merged (PR #22).
 
 ## Hand-off
 
