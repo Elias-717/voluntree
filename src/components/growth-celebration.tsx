@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useEffect, useSyncExternalStore } from "react";
 import { Certificate } from "@phosphor-icons/react";
 import { readDevice, subscribeDevice, writeDevice } from "@/lib/device-store";
+import { TREE_STAGES } from "@/lib/tree/tree";
+import { WaterDrop } from "./water-drop";
 
 interface Props {
   studentId: string;
@@ -34,8 +36,15 @@ export function GrowthCelebration({ studentId, stageIndex, stageName, imagePath,
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="grew-title"
       className="fixed inset-0 z-20 flex flex-col items-center bg-header px-4 pb-8 pt-20 text-center text-[#f4f7ef]">
-      <div className="relative aspect-square w-72 rounded-full bg-white/15">
-        <Image src={imagePath} alt="" fill className="object-contain p-10" />
+      {/* Growth moment (DEC-053): drops fall, the old stage shrinks away, the new one grows in. */}
+      <div className="grow-glow relative aspect-square w-72 rounded-full bg-white/15">
+        {[0, 0.15, 0.3].map((delay, i) => (
+          <WaterDrop key={i} className="water-drop absolute top-6 w-5" style={{ left: `${38 + i * 12}%`, animationDelay: `${delay}s` }} />
+        ))}
+        {stageIndex > 0 && (
+          <Image src={`/tree/${TREE_STAGES[stageIndex - 1]}.svg`} alt="" fill className="grow-old object-contain p-10" />
+        )}
+        <Image src={imagePath} alt="" fill className="grow-new object-contain p-10" />
       </div>
       <h2 id="grew-title" className="mt-8 text-3xl font-semibold tracking-[-0.03em]">You grew a {stageName}</h2>
       <p className="mt-2 text-sm opacity-85">

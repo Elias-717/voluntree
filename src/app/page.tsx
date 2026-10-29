@@ -34,7 +34,7 @@ export default function Landing() {
             </h2>
             <p className="mt-5 max-w-md text-lg text-muted">
               Approve a student&apos;s attendance and their tree gets one watering. Every 3 waterings it grows a stage,
-              from seed to full tree. This is the same gauge students see on their home screen.
+              from seed to date palm. This is the same gauge students see on their home screen.
             </p>
             <Link href="/sign-in#demo" className="mt-7 inline-flex items-center gap-2 font-medium text-accent underline-offset-4 hover:underline">
               <UserCircle size={20} aria-hidden /> Or sign in as a demo student, organizer or admin <ArrowRight size={16} aria-hidden />

@@ -1,2 +1,4 @@
 # The evaluation test compares results.md byte for byte with a fresh run (FR-026).
 scripts/evaluate/results.md text eol=lf
+# Khathera's SVG checks compare exact lines, so the stage drawings keep LF endings on Windows too (DEC-053).
+public/tree/*.svg text eol=lf
