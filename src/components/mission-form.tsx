@@ -9,6 +9,7 @@ import { startTransition, useActionState, useState } from "react";
 import { Check, Sparkle } from "@phosphor-icons/react";
 import type { School } from "@/types/domain";
 import { saveMission } from "@/lib/actions/staff";
+import { CertificateSection } from "./certificate-section";
 import { IntakePanel } from "./intake-panel";
 
 const SCHOOLS: School[] = ["SBSS", "SEHS", "SCI", "CFGS", "LC"];
@@ -27,6 +28,10 @@ export interface MissionDraft {
   eligibleSchools?: School[];
   minCgpa?: number | null;
   dean?: boolean;
+  /** Certificate design (DEC-063). */
+  certTemplate?: string;
+  certAccent?: string;
+  certDescription?: string;
 }
 
 interface Props {
@@ -145,6 +150,8 @@ export function MissionForm({ admin, draft: saved = {}, organizations = [], crit
         ) : (
           <p className="text-sm text-muted">Open to all students. Only admins can set eligibility criteria.</p>
         )}
+
+        <CertificateSection template={draft.certTemplate} accent={draft.certAccent} description={draft.certDescription} />
       </div>
 
       <aside className="flex flex-col gap-3">
