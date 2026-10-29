@@ -151,6 +151,10 @@ Evaluate the live configuration (no skills, no declared availability, no reliabi
 
 **Done when:** merged (PR #22).
 
+### Note — Certificate designs (DEC-063), changed by Elias with your permission
+
+`generateCertificatePdf` now takes optional `template` (classic, modern, minimal), `accent`, `description` and `logo`. With none of them, Classic is drawn exactly as before; your 37 tests pass unchanged, and 7 new tests in your test file cover the presets, the description and the logo. The preset and accent lists live in `src/lib/certificate/designs.ts`, the logo bytes in `logo.ts`. Please review when you can.
+
 ## Hand-off
 
 Elias's screens import these functions. Do not change a function's name or inputs once its pull request is merged without asking first.
