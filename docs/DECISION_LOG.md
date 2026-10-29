@@ -421,6 +421,14 @@ Rules:
 - Decided by: Elias
 - Supersedes: the provider and model parts of DEC-046
 
+### DEC-050 — Skills no longer affect the ranking
+- Date: 2026-10-29
+- Change: missions keep their skills, and students still see and search them, but the app passes no skills to matching, so the skill factor is left out of the score. Matching already scales the remaining weights to add up to 1, so "Why recommended" now shows opportunity balance 80% and reliability 20% (proximity stays unused). The consent notice now says students with fewer chances so far are suggested first, instead of mentioning skills. The matching module, its tests and the evaluation script are unchanged; `scripts/evaluate/results.md` was computed with skills, so the evaluation write-up must say the live app ranks without them. Planned next step: a fixed skill list chosen by students (FR-003) and organizers, with the AI limited to that list; then skills can be passed to matching again.
+- Affects: `src/lib/db/student.ts` (`toMission`), consent screen (screen 2); DEC-036 score weights in practice; FR-007 explanation.
+- Reason: Approved by Elias after a student was recommended with "0 of 5 required skills". Students have no screen to declare skills, and the AI writes free-text skills that rarely match exactly, so the factor added noise and half the score without information.
+- Decided by: Elias
+- Supersedes: the skill part of the DEC-036 score weights, until the skill list exists
+
 ### DEC-051 — The tree becomes a palm tree
 - Date: 2026-10-29
 - Change: the tree is drawn as a palm everywhere. Landing page (screen 0): the WebGL model is a palm whose trunk is covered in sharp-edged diamond scales (old frond bases, in crossing spirals) and carries a crown of 16 feather fronds, standing on a low round plinth (a specimen base) that widens with the trunk, from just wider than the young palm's foot to full size; scrolling first opens fronds at ground level, then the trunk rises and carries the crown up. Student screens: Khathera redraws the 5 stage SVGs as a palm's life (date seed, spear leaf, trunkless young palm, short-trunk palm, full palm with dates), with a gentle CSS sway that stops under reduced motion (`docs/team/KHATHERA.md` Task 5). Stage names, stage IDs, the 3-watering step and `getTreeStage` are unchanged, and "tree" stays the product word.
@@ -428,3 +436,11 @@ Rules:
 - Reason: Approved by Elias; a palm (date palm) fits the campus setting and its life stages read clearly.
 - Decided by: Elias
 - Supersedes: the drawing style of the DEC-006 stages
+
+### DEC-052 — Attendance opens at the start; Mark all present; QR check-in
+- Date: 2026-10-29
+- Change: (1) Present and Absent appear once the mission has started, not only after it ends, so organizers can take attendance at the event. (2) "Mark all present" approves every confirmed student who isn't marked yet; each approval still goes through `approve_completion`, so it adds exactly one watering and repeating it changes nothing. (3) QR check-in (FR-016, Should): from 1 hour before the start until the end, the organizer or an admin taps "Start check-in", which gives the mission a random secret (`check_in_sessions`, readable only by the mission's organizer and admins). The screen shows a QR whose code is the first 12 hex characters of HMAC-SHA256(secret, mission ID and current minute), so it changes every minute; the current and previous minute's codes are accepted. Students scan it with the phone camera, which opens `/student/check-in/[id]`, and tap "I'm here"; `check_in` records one row in `check_ins` per assignment. The review screen shows who checked in. Checking in never approves attendance or waters a tree: the organizer still taps Present or Mark all present. (4) Demo seed: an in-progress mission "Campus Open Day Helpers" with Farid and Mei Lin confirmed, for the QR demo; `supabase/seed.sql` has the SQL to move it back into progress before a pitch. "Building D Cleaning Help" (ended, Farid and Mei Lin waiting) still serves demo step 5.
+- Affects: new migration `20261029150000_check_ins.sql` (applied to the live project), new dependency `qrcode` (and `@types/qrcode`), `src/lib/check-in.ts`, staff and student actions, attendance review, new student screen `/student/check-in/[id]`, seed data (live and `supabase/seed.sql`); FR-008, FR-016; AGENTS.md §6 Q13.
+- Reason: Approved by Elias after the Phase 2 exit check found that attendance could not be taken during a live demo. Elias chose a 1-minute code, scan records "checked in" (not approval), and a re-timeable demo mission.
+- Decided by: Elias
+- Supersedes: none

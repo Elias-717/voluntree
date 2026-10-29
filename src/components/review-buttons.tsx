@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Check, X } from "@phosphor-icons/react";
-import { markAbsent, markPresent, revokeApproval } from "@/lib/actions/staff";
+import { markAbsent, markAllPresent, markPresent, revokeApproval } from "@/lib/actions/staff";
 
 export function ReviewButtons({ assignmentId, missionId }: { assignmentId: string; missionId: string }) {
   const [pending, startTransition] = useTransition();
@@ -22,6 +22,20 @@ export function ReviewButtons({ assignmentId, missionId }: { assignmentId: strin
           <X size={16} aria-hidden /> Absent
         </button>
       </div>
+      {error && <p role="alert" className="text-xs text-brown">{error}</p>}
+    </div>
+  );
+}
+
+export function MarkAllPresentButton({ missionId, count }: { missionId: string; count: number }) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <div className="inline-flex flex-col items-end gap-1">
+      <button onClick={() => startTransition(async () => setError(await markAllPresent(missionId)))} disabled={pending}
+        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary disabled:opacity-60">
+        <Check size={16} aria-hidden /> {pending ? "Marking…" : `Mark all present (${count})`}
+      </button>
       {error && <p role="alert" className="text-xs text-brown">{error}</p>}
     </div>
   );

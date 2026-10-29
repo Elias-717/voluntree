@@ -142,4 +142,24 @@ insert into public.mission_assignments (mission_id, student_id, status, applied_
   ('00000000-0000-4000-c000-000000002003', '00000000-0000-4000-a000-000000000014', 'ACCEPTED', '2026-10-21 09:00+08'),
   ('00000000-0000-4000-c000-000000002003', '00000000-0000-4000-a000-000000000013', 'ACCEPTED', '2026-10-21 09:30+08');
 
+-- In progress for the QR check-in demo (DEC-052): started 30 minutes ago, ends in 3 hours.
+-- Farid and Mei Lin are confirmed. Before a pitch, move it back into progress with:
+--   update public.missions set starts_at = now() - interval '30 minutes', ends_at = now() + interval '3 hours'
+--   where id = '00000000-0000-4000-c000-000000002004';
+insert into public.missions (
+  id, organization_id, title, description, required_skills, place, starts_at, ends_at, capacity,
+  status, verification_policy, safety_notes, eligible_schools, min_cgpa, dean_approval_required,
+  created_by, published_at
+) values
+  ('00000000-0000-4000-c000-000000002004', '00000000-0000-4000-b000-000000000001',
+   'Campus Open Day Helpers', 'Guide visiting families around campus and help at the information booth.',
+   '{"registration desk"}', 'Main Hall',
+   now() - interval '30 minutes', now() + interval '3 hours', 6,
+   'PUBLISHED', 'Organizer confirms attendance', null,
+   '{}', null, false, '00000000-0000-4000-a000-000000000002', now() - interval '2 days');
+
+insert into public.mission_assignments (mission_id, student_id, status, applied_at) values
+  ('00000000-0000-4000-c000-000000002004', '00000000-0000-4000-a000-000000000014', 'ACCEPTED', now() - interval '1 day'),
+  ('00000000-0000-4000-c000-000000002004', '00000000-0000-4000-a000-000000000013', 'ACCEPTED', now() - interval '1 day');
+
 commit;
