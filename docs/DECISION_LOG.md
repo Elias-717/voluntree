@@ -404,3 +404,11 @@ Rules:
 - Reason: Approved by Elias after the end-to-end test found that cancelled missions still blocked students and drafts could never be removed.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-048 — Declared availability removed
+- Date: 2026-10-29
+- Change: students no longer declare availability. They accept only missions they can attend. The app passes an empty availability list to matching for every student, so matching excludes no one for availability (it reads an empty list as unknown). The "Are you free for the whole mission?" step before accepting and its "Set my availability" link are removed, so accepting is one tap. The consent notice no longer mentions free time. Time-conflict checks stay: matching still skips missions that overlap a pending or accepted assignment, and `accept_mission` still rejects overlaps. The `student_profiles.availability` column and the matching module's availability filter stay in place, unused; removing them is a later clean-up. Resolves AGENTS.md §6 open question 5 for availability (skills entry stays open). The SRS §10 Stage 1 availability filter and the FR-025 wording are superseded by this entry.
+- Affects: `src/lib/db/student.ts`, student mission screen and accept button, consent screen (screen 2); DEC-036 availability rules.
+- Reason: Approved by Elias after a published mission did not reach a demo student whose declared availability covered other days; there is no screen to declare availability, so the filter hid missions for no reason the student could see or fix.
+- Decided by: Elias
+- Supersedes: the availability parts of DEC-036

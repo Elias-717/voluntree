@@ -2,7 +2,7 @@
 // Every query runs as the signed-in student, so row-level security decides what is visible.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Commitment, Mission, Student, TimeWindow } from "@/types/domain";
+import type { Commitment, Mission, Student } from "@/types/domain";
 
 export interface MissionRow {
   id: string;
@@ -64,7 +64,7 @@ export async function loadStudent(supabase: SupabaseClient, studentId: string, d
   const [{ data: details }, { data: assignments }, { count: approved }] = await Promise.all([
     supabase
       .from("student_profiles")
-      .select("skills, availability, matching_opt_out, school, cgpa")
+      .select("skills, matching_opt_out, school, cgpa")
       .eq("user_id", studentId)
       .single(),
     // Every assignment, in all three statuses (DEC-036).
@@ -95,7 +95,9 @@ export async function loadStudent(supabase: SupabaseClient, studentId: string, d
     id: studentId,
     displayName,
     skills: details?.skills ?? [],
-    availability: (details?.availability ?? []) as TimeWindow[],
+    // No declared availability (DEC-048): students only accept missions they can attend.
+    // Matching reads an empty list as unknown and excludes no one for it.
+    availability: [],
     matchingOptOut: details?.matching_opt_out ?? false,
     school: details?.school ?? "SBSS",
     cgpa: details?.cgpa === null || details?.cgpa === undefined ? null : Number(details.cgpa),

@@ -6,7 +6,7 @@ import { giveConsent } from "../actions";
 import { Progress } from "../progress";
 
 const PROMISES = [
-  { Icon: Target, text: "We use your skills and free time to suggest missions." },
+  { Icon: Target, text: "We use your skills to suggest missions." },
   { Icon: LockSimple, text: "School and CGPA only check who can join. Some missions are for one school." },
   { Icon: UserCheck, text: "It is always your choice. People decide, not the AI." },
 ];
@@ -46,7 +46,7 @@ export default async function Welcome() {
       <details className="mt-4 rounded-[14px] px-1 text-sm text-muted">
         <summary className="cursor-pointer font-medium text-text">Read the full notice</summary>
         <div className="mt-2 flex flex-col gap-2">
-          <p>Voluntree uses your declared skills and the times you say you are free to suggest missions. Your declared school and CGPA are used only to check whether you can join missions that set school or CGPA criteria, and some missions are open to one school only.</p>
+          <p>Voluntree uses your declared skills to suggest missions, and only suggests missions that don&apos;t clash with ones you have already joined. Your declared school and CGPA are used only to check whether you can join missions that set school or CGPA criteria, and some missions are open to one school only.</p>
           <p>Suggestions are advisory: you decide whether to accept, and organizers and admins make the final decisions. Taking part is optional and saying no costs you nothing.</p>
           <p>You can opt out of suggestions here or later in Me. Only you and admins can see your CGPA. This is a prototype with synthetic demo data, not an official AIU system.</p>
         </div>
