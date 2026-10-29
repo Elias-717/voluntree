@@ -500,3 +500,11 @@ Rules:
 - Reason: Approved by Elias: scanning with the student's phone should be enough.
 - Decided by: Elias
 - Supersedes: the "tap I'm here" step of DEC-052
+
+### DEC-060 — Admin "Users" page
+- Date: 2026-10-29
+- Change: a view-only "Users" page in the admin menu lists every account with role, organization (organizers), status (Active; Onboarding when a student has not agreed to the consent notice yet; Guest; Deactivated), school and CGPA, approved participations, upcoming missions joined, requests waiting for the dean, suggestions on or off, and when the account was created. Filter by role, search by name; deactivated accounts (including the test logins, DEC-044) are hidden unless "Show deactivated" is on. It uses data admins can already read under row-level security, so no database change. CGPA stays admin-only (FR-028). The palm tree stays private to each student (BR-13): the page shows the number of approved participations, the same count as the fairness chart, not the tree.
+- Affects: new `src/app/admin/users/page.tsx`, admin menu; FR-014 (part).
+- Reason: Approved by Elias: admins need one place to see everyone and their status.
+- Decided by: Elias
+- Supersedes: none
