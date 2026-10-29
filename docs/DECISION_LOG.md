@@ -476,3 +476,19 @@ Rules:
 - Reason: Approved by Elias: Farid should have completed at least one phase during the demo, the palm stages should animate continuously in the student portal, and the website should feel live in every action.
 - Decided by: Elias
 - Supersedes: the "demo student starts at 2 waterings" part of DEC-021
+
+### DEC-057 — Editing published missions
+- Date: 2026-10-29
+- Change: organizers and admins can edit a published mission until it starts, from an "Edit" button on the mission page and an "Edit" link in the missions list (the existing form at `/organizer/new?id=` and `/admin/new?id=`, titled "Edit mission", with one "Save changes" button that keeps the publish checks). Title, description, place, skills, safety notes and slots stay editable; once any student has joined (pending dean approval or accepted), the date and time lock (shown read-only with an explanation) and slots can't go below the students already in. Criteria keep their own lock (BR-14); the form now leaves locked criteria as they are instead of sending them empty. Saving changes keeps the original publish time and returns to the mission page. A mission that has started can't be edited. The rules are enforced in the database by a new trigger, `check_mission_edit`, which skips changes made without a signed-in user (seed scripts, the SQL editor, re-timing the demo mission) and status-only changes (cancelling). Students aren't notified of changes (FR-012 is a Should); the form tells staff to mention big changes themselves.
+- Affects: new migration `20261029180000_edit_published_missions.sql` (applied to the live project), `saveMission`, `loadDraft`, mission form, organizer and admin form pages, mission page, missions list; FR-004.
+- Reason: Approved by Elias: staff need to fix a published mission without cancelling it, without surprising students who already joined.
+- Decided by: Elias
+- Supersedes: none
+
+### DEC-058 — In-app notifications
+- Date: 2026-10-29
+- Change: FR-012 built. A `notifications` table filled by database triggers on the tables the existing functions already change (mission_assignments, completions, missions, check_ins), so each event gives exactly one notification in the same transaction and no tested function changed. Students: invitation when an upcoming mission they are eligible for is published (school and CGPA only, not the score; not sent to students who opted out of suggestions), you're in or request sent to the dean, the dean's decision, attendance approved (watering and certificate ready), marked absent, approval revoked, and a joined mission edited (what changed: title, time, place, description, safety notes) or cancelled. Organizers: a student joined, a student checked in by QR. Admins: a new dean approval request. Missions of the Phase 1 test organization never send invitations or admin alerts, so test runs can't fill the demo inboxes. Screens: a bell with the unread count on every student tab (top right) and an "Inbox" item with a badge in the staff menu; the 5-second refresh keeps counts live and the badge pops when it changes. Inbox pages for each role; opening the inbox marks everything read. People read only their own notifications and can change only `read_at`.
+- Affects: new migration `20261029190000_notifications.sql` (applied to the live project), student tabs layout, organizer and admin layouts, new inbox pages and components; FR-012; closes the "students aren't notified" gap in DEC-057.
+- Reason: Approved by Elias; chose all four student event groups (status changes, approval and certificate, changes and cancellations, invitations) and staff notifications.
+- Decided by: Elias
+- Supersedes: none
