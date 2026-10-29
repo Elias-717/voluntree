@@ -420,3 +420,11 @@ Rules:
 - Reason: Approved by Elias; the Gemini project had no free tier and needed billing. Of the Groq models available to the key, a live test with a synthetic announcement showed only `openai/gpt-oss-120b` resolved "next Saturday" correctly (`openai/gpt-oss-20b` gave a Friday, `qwen/qwen3.8-27b` the week after); with the weekday in the prompt it was correct 5 times out of 5.
 - Decided by: Elias
 - Supersedes: the provider and model parts of DEC-046
+
+### DEC-050 — Skills no longer affect the ranking
+- Date: 2026-10-29
+- Change: missions keep their skills, and students still see and search them, but the app passes no skills to matching, so the skill factor is left out of the score. Matching already scales the remaining weights to add up to 1, so "Why recommended" now shows opportunity balance 80% and reliability 20% (proximity stays unused). The consent notice now says students with fewer chances so far are suggested first, instead of mentioning skills. The matching module, its tests and the evaluation script are unchanged; `scripts/evaluate/results.md` was computed with skills, so the evaluation write-up must say the live app ranks without them. Planned next step: a fixed skill list chosen by students (FR-003) and organizers, with the AI limited to that list; then skills can be passed to matching again.
+- Affects: `src/lib/db/student.ts` (`toMission`), consent screen (screen 2); DEC-036 score weights in practice; FR-007 explanation.
+- Reason: Approved by Elias after a student was recommended with "0 of 5 required skills". Students have no screen to declare skills, and the AI writes free-text skills that rarely match exactly, so the factor added noise and half the score without information.
+- Decided by: Elias
+- Supersedes: the skill part of the DEC-036 score weights, until the skill list exists

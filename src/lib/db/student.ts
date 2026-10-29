@@ -36,7 +36,9 @@ export function toMission(row: MissionRow, held: number): Mission {
     id: row.id,
     organizationId: row.organization_id,
     title: row.title,
-    requiredSkills: row.required_skills,
+    // Skills are shown to students but not ranked on (DEC-050): students have no way to declare
+    // theirs yet, so matching skips the skill factor and shares its weight among the others.
+    requiredSkills: [],
     window: { start: row.starts_at, end: row.ends_at },
     capacity: row.capacity,
     acceptedCount: held,
