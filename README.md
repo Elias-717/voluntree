@@ -25,7 +25,7 @@ Everything below runs on the live site with synthetic demo data. Pick a role on 
 
 | Rubric criterion | Where to look | What you'll see |
 |---|---|---|
-| **Problem relevance and impact** (20) | [The problem](#the-problem) · [Results](#does-it-work-the-evidence) | Who gets left out today, and how much fairer the matching is on simulated data |
+| **Problem relevance and impact** (20) | [The problem](#the-problem) · [From evidence to design](#from-evidence-to-design) · [Results](#does-it-work-the-evidence) | Our survey of 20 students: **7 of 13 applicants turned away** at least once, **4 of 13 volunteers never got a certificate**. Then how much fairer the matching is on simulated data |
 | **Technical execution** (25) | Sign in as **Madam Fazilah** (organizer) → open a mission | Live attendance, QR check-in, exactly-once rewards, PDF certificates. 293 automated tests, 12 database migrations |
 | **Innovation and use of AI** (15) | Organizer → **New mission** → *Paste text* → *Draft with AI* · Mission → **Certificate** → *Suggest with AI* | An announcement becomes a mission draft in about 2 seconds; the AI never publishes anything itself |
 | **Responsible AI, ethics, security** (10) | Student **Farid** → a mission → *Why recommended* · [Responsible by design](#responsible-by-design) | Every score explained, consent first, CGPA used only as an eligibility filter, nothing published automatically |
@@ -46,10 +46,41 @@ Everything below runs on the live site with synthetic demo data. Pick a role on 
 
 ## The problem
 
-Campus events at AIU run on student volunteers, but recruitment is manual: group-chat posts, posters, *first come, first served*.
-The same quick, well-connected students fill the slots again and again, and many students never get their first chance. Organizers spend time chasing attendance and writing certificates by hand.
+Campus events at AIU run on student volunteers, but recruitment happens in WhatsApp and Telegram groups, and when more students want a slot than there are slots, the first to reply gets it.
+Our survey suggests what that leads to: a few students do most of the volunteering, others are turned away or never find out where to apply, and certificates arrive late or not at all. And organizers say their hardest job is simply *finding enough volunteers*.
 
-> **Our evidence:** to check this, we surveyed **20 AIU students** and interviewed the **head warden**. Their findings are being added to this section.
+> **Our evidence:** to check this, we surveyed AIU students and interviewed a Student Affairs officer.
+
+**Student survey:** 22 responses. The 2 from our own team are excluded, so **n = 20**.
+
+| Finding | Result |
+|---|---|
+| A few students do most of the volunteering | 7 of 20 did 3 or more events this year, accounting for **at least 75%** of all participations reported (counting from the low end of each answer range). Another 7 did none. |
+| Students are turned away | **7 of the 13** who have applied were not selected at least once. |
+| Some never get started | Of the 7 with no events this year, 5 have never applied. *"I don’t know where to apply to volunteer and that’s why I have no voluntary experience."* |
+| Volunteers go unrecognised | **4 of the 13** who volunteered this year never received a certificate or official record. |
+| Certificates are slow | Of the 9 who received one, 8 waited a week or more and 3 waited three weeks or more. |
+
+Other comments: *"Need to keep rotating volunteers if seats are limited"* · *"Mostly certificates looks just random and doesn’t look professional"*
+
+**Student Affairs interview:** one officer, quoted anonymously as they asked.
+- 0–5 campus events per semester need student volunteers.
+- Volunteers are recruited only through WhatsApp and Telegram groups.
+- When more students want a slot than there are slots, they are chosen **first come, first served**.
+- Participation is recorded in a Google Form or spreadsheet, and certificates are issued by whoever manages the event.
+- The hardest part is **finding enough volunteers**. Asked what should improve: *"Easy to find volunteer"*.
+
+**What this evidence does not show:** the officer was *not sure* whether the same students volunteer repeatedly. They said volunteers *always* receive a certificate, although 4 of our 13 student volunteers say they never did, and they did not list attendance or certificates as a difficulty. The survey is small, self-selected and collected in one day: indicative, not representative of AIU.
+
+## From evidence to design
+
+| What we heard | How Voluntree answers |
+|---|---|
+| A few students do most of the volunteering; *"keep rotating volunteers if seats are limited"* | The matching score puts students with **fewer past chances first**, and explains why to each of them |
+| Slots go to whoever replies first; 7 of 13 applicants were turned away | No race: missions are recommended fairly, and capacity is enforced by the database, not by reply speed |
+| *"I don’t know where to apply"*; 5 of the 7 with no events never applied | Missions come to students: **Find a mission**, a personal *For you* list, and an invitation in their inbox when a mission opens to them |
+| 4 of 13 volunteers never got a certificate; 8 of 9 waited a week or more; *"doesn’t look professional"* | A **PDF certificate the moment attendance is approved**, in one of three professional designs, each with its own certificate ID |
+| Organizers' hardest job is finding enough volunteers; records live in forms and spreadsheets | AI turns an announcement into a mission draft in seconds, invitations reach every eligible student, and QR check-in with *Mark all present* replaces the spreadsheet |
 
 ## What Voluntree does
 
@@ -201,7 +232,7 @@ docs/                  SRS, PRD, decision log (64 entries), AI usage logs
 |---|---|
 | Demo accounts and synthetic guests only; no real sign-up | AIU single sign-on, with a privacy review |
 | Skills don't affect ranking yet: students can't pick skills (DEC-050) | A fixed skill list chosen by students and organizers |
-| Evaluation is synthetic | A one-semester pilot with one office, building on our interview with the head warden |
+| Evaluation is synthetic | A one-semester pilot with one office, building on our interview with Student Affairs |
 | The dean's decision is recorded by an admin; there is no dean login | A dean role, if a pilot asks for it |
 | An admin can't re-approve after a revocation on screen (the database already supports it) | A *Re-approve* button |
 | Live updates by polling | Realtime subscriptions |
@@ -215,7 +246,7 @@ docs/                  SRS, PRD, decision log (64 entries), AI usage logs
 |---|---|
 | **Elias Al-Sumairi** | Developer and team lead: database, screens, AI features, product decisions |
 | **Khathera** | Developer: matching engine, certificates, palm stages, evaluation |
-| **Wazhma Maroof** | Research: the survey of 20 students and the interview with the head warden |
+| **Wazhma Maroof** | Research: the student survey (n = 20) and the Student Affairs interview |
 | **Mohammed Khalid Abdo** | Presenter: pitch and live demo |
 
 **AI declaration:** we used AI coding assistants and an LLM in the product. Every tool, model and prompt is logged in [`docs/ai-usage/`](docs/ai-usage), and the product's own AI calls are logged in the database (`ai_usage_log`).
