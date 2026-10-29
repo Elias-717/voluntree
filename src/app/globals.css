@@ -25,6 +25,16 @@
   color-scheme: light;
 }
 
+/* Logo (DEC-062): dark roots on light backgrounds, the original cream roots in dark mode, following the
+   same System / Light / Dark rules as the colours below. */
+.logo-dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-light { display: none; }
+  :root:not([data-theme="light"]) .logo-dark { display: inline; }
+}
+:root[data-theme="dark"] .logo-light { display: none; }
+:root[data-theme="dark"] .logo-dark { display: inline; }
+
 /* Dark Garden (DEC-031). "System" follows the device; Light and Dark are set on <html data-theme>. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {

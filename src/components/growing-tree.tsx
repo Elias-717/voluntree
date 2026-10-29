@@ -8,7 +8,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { Plant } from "@phosphor-icons/react";
+import Image from "next/image";
 
 // #region tree model
 type V3 = [number, number, number];
@@ -953,10 +953,9 @@ export function GrowingTree() {
 
         {/* always on top: brand and sign in */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between" style={{ padding: "3cqh 5cqw" }}>
-          <Link href="/" className="pointer-events-auto flex items-center gap-2.5 text-lg font-semibold tracking-tight">
-            <span className="grid size-9 place-items-center rounded-[10px]" style={{ background: LEAF, color: INK }}>
-              <Plant size={20} weight="fill" aria-hidden />
-            </span>
+          <Link href="/" className="pointer-events-auto flex items-center gap-2 text-lg font-semibold tracking-tight">
+            {/* The hero is always dark, so the original cream-rooted logo shows here (DEC-062). */}
+            <Image src="/brand/logo-on-dark.png" alt="" width={36} height={36} priority />
             Voluntree
           </Link>
           <Link href="/sign-in" className="pointer-events-auto rounded-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-[#d8d5c0] hover:text-[#0d0f0c]"

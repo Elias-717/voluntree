@@ -18,6 +18,8 @@ import {
   generateCertificatePdf,
   type CertificateInput,
 } from "./certificate";
+import { CERTIFICATE_TEMPLATES } from "./designs";
+import { VOLUNTREE_LOGO_PNG_BASE64 } from "./logo";
 
 const sample: CertificateInput = {
   studentName: "Aisha Rahman",
@@ -278,5 +280,59 @@ describe("cleanText", () => {
     expect(() => cleanText("Aisha\tRahman", "Student name")).toThrow(
       "Student name contains a control character (U+0009).",
     );
+  });
+});
+
+describe("certificate designs (DEC-063)", () => {
+  const logo = Buffer.from(VOLUNTREE_LOGO_PNG_BASE64, "base64");
+  const role = "Guided visiting families around campus and helped at the information booth.";
+  const imageCount = async (bytes: Uint8Array) => {
+    const resources = (await PDFDocument.load(bytes)).getPage(0).node.Resources();
+    return resources?.lookupMaybe(PDFName.of("XObject"), PDFDict)?.keys().length ?? 0;
+  };
+
+  it("draws the default Classic exactly as before when no design is chosen", async () => {
+    const before = await extractDrawnText(await generateCertificatePdf(sample));
+    const chosen = await extractDrawnText(await generateCertificatePdf({ ...sample, template: "classic", accent: "green", description: "  " }));
+    expect(chosen).toEqual(before);
+  });
+
+  for (const template of CERTIFICATE_TEMPLATES) {
+    it(`${template}: keeps the title, all four fields and the watermark, inside the page`, async () => {
+      const drawn = await extractDrawnText(await generateCertificatePdf({ ...sample, template, accent: "teal", logo, description: role }));
+      const text = drawn.map((d) => d.text);
+      for (const field of [CERTIFICATE_TITLE, "Aisha Rahman", "Orientation Week Welcome Desk", "2 November 2026", "VT-2026-000123", PROTOTYPE_WATERMARK]) {
+        expect(text).toContain(field);
+      }
+      for (const d of drawn.filter((d) => d.text !== PROTOTYPE_WATERMARK)) {
+        expect(d.x).toBeGreaterThanOrEqual(template === "modern" ? 176 : 34);
+        expect(d.y).toBeGreaterThan(34);
+        expect(d.y).toBeLessThan(561);
+      }
+    });
+  }
+
+  it("shows the description under the mission and above the footer, without losing words", async () => {
+    const drawn = await extractDrawnText(await generateCertificatePdf({ ...sample, description: role }));
+    const mission = drawn.find((d) => d.text === "Orientation Week Welcome Desk")!;
+    const lines = drawn.filter((d) => d.font === "Helvetica-Oblique");
+    expect(lines.map((d) => d.text).join(" ")).toBe(role);
+    expect(lines.length).toBeLessThanOrEqual(2);
+    for (const line of lines) {
+      expect(line.y).toBeLessThan(mission.y);
+      expect(line.y).toBeGreaterThan(168); // the footer rule
+    }
+  });
+
+  it("rejects a description that is too long or in another script", async () => {
+    await expect(generateCertificatePdf({ ...sample, description: "x".repeat(161) })).rejects.toThrow("at most 160");
+    await expect(generateCertificatePdf({ ...sample, description: "متطوع" })).rejects.toThrow("Description contains a character");
+  });
+
+  it("adds the logo image only when it is given", async () => {
+    expect(await imageCount(await generateCertificatePdf(sample))).toBe(0);
+    for (const template of CERTIFICATE_TEMPLATES) {
+      expect(await imageCount(await generateCertificatePdf({ ...sample, template, logo }))).toBe(1);
+    }
   });
 });

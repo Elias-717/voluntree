@@ -1,7 +1,10 @@
 // Certificate PDF download (FR-010). The database decides who may download and rejects revoked
-// certificates (get_certificate_for_download); the PDF is drawn by Khathera's generator.
+// certificates (get_certificate_for_download); the PDF is drawn by Khathera's generator, with the design
+// the certificate was first issued with and the Voluntree logo (DEC-063).
 
 import { generateCertificatePdf } from "@/lib/certificate/certificate";
+import { isAccent, isTemplate } from "@/lib/certificate/designs";
+import { VOLUNTREE_LOGO_PNG_BASE64 } from "@/lib/certificate/logo";
 import { createClient } from "@/lib/db/server";
 
 export async function GET(_request: Request, { params }: RouteContext<"/certificates/[id]">) {
@@ -16,12 +19,19 @@ export async function GET(_request: Request, { params }: RouteContext<"/certific
     return new Response(text, { status, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
 
-  const row = data as { serial: string; student_name: string; mission_title: string; mission_date: string };
+  const row = data as {
+    serial: string; student_name: string; mission_title: string; mission_date: string;
+    design_template?: string; design_accent?: string; design_description?: string | null;
+  };
   const pdf = await generateCertificatePdf({
     studentName: row.student_name,
     missionTitle: row.mission_title,
     date: row.mission_date,
     certificateId: row.serial,
+    template: isTemplate(row.design_template) ? row.design_template : "classic",
+    accent: isAccent(row.design_accent) ? row.design_accent : "green",
+    description: row.design_description ?? null,
+    logo: Buffer.from(VOLUNTREE_LOGO_PNG_BASE64, "base64"),
   });
   return new Response(Buffer.from(pdf), {
     headers: {

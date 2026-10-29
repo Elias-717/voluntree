@@ -14,6 +14,9 @@ import { createClient } from "@/lib/db/server";
 import { getMe, homeFor } from "@/lib/db/session";
 import { myOrganizationIds } from "@/lib/db/staff";
 import { blanksOf, draftMission, hashPrompt, INTAKE_MODEL, INTAKE_VERSION, type Draft } from "@/lib/intake/draft";
+import { CERTIFICATE_SUGGEST_VERSION, suggestCertificateDesign, type CertificateSuggestion } from "@/lib/intake/certificate-suggest";
+import { generateCertificatePdf } from "@/lib/certificate/certificate";
+import { DESCRIPTION_MAX, isAccent, isTemplate } from "@/lib/certificate/designs";
 
 const SCHOOLS: School[] = ["SBSS", "SEHS", "SCI", "CFGS", "LC"];
 
@@ -50,6 +53,21 @@ export async function saveMission(_state: string | null, form: FormData): Promis
 
   if (capacity !== null && !(Number.isInteger(capacity) && capacity > 0)) return "Slots must be a whole number above 0.";
   if (startsAt && endsAt && endsAt <= startsAt) return "The end time must be after the start time.";
+
+  // Certificate design (DEC-063): organizers and admins pick a preset, an accent and an optional line.
+  const certificateDescription = text("certDescription").replace(/\s+/g, " ") || null;
+  fields.certificate_template = isTemplate(text("certTemplate")) ? text("certTemplate") : "classic";
+  fields.certificate_accent = isAccent(text("certAccent")) ? text("certAccent") : "green";
+  fields.certificate_description = certificateDescription;
+  if (certificateDescription) {
+    if (certificateDescription.length > DESCRIPTION_MAX) return `The certificate line can be at most ${DESCRIPTION_MAX} characters.`;
+    // Draw a test certificate, so a line the PDF can't show (e.g. Arabic) is caught here, not at download.
+    try {
+      await generateCertificatePdf({ studentName: "Test", missionTitle: "Test", date: "2026-01-01", certificateId: "TEST", description: certificateDescription });
+    } catch {
+      return "The certificate line can only use English letters, digits and ordinary punctuation.";
+    }
+  }
   if (publish) {
     const missing = ["title", "description", "place", "starts_at", "capacity"].filter((k) => !fields[k]);
     if (missing.length > 0) return "Fill in title, description, place, date, times and slots to publish.";
@@ -227,6 +245,32 @@ export async function draftFromAnnouncement(announcement: string): Promise<Draft
   });
   if (!draft) return { error: "The AI couldn't draft this one. Fill in the form by hand instead." };
   return { draft, blanks: blanksOf(draft) };
+}
+
+export type CertificateSuggestResult = CertificateSuggestion | { error: string };
+
+/** "Suggest with AI" for a mission's certificate (DEC-063). Logged in ai_usage_log like mission intake. */
+export async function suggestCertificate(title: string, details: string): Promise<CertificateSuggestResult> {
+  await requireStaff();
+  if (title.trim().length < 3 || details.trim().length < 10) {
+    return { error: "Fill in the mission title and description first, so the AI knows what the role is." };
+  }
+  let prompt = "";
+  let suggestion: CertificateSuggestion | null = null;
+  try {
+    ({ prompt, suggestion } = await suggestCertificateDesign(title, details));
+  } catch {
+    suggestion = null;
+  }
+  const supabase = await createClient();
+  await supabase.from("ai_usage_log").insert({
+    feature: "certificate_design",
+    model: INTAKE_MODEL,
+    version: CERTIFICATE_SUGGEST_VERSION,
+    prompt_hash: hashPrompt(prompt || title + details),
+    succeeded: suggestion !== null,
+  });
+  return suggestion ?? { error: "The AI couldn't suggest one this time. Choose the design and write the line yourself." };
 }
 
 async function review(fn: string, args: Record<string, unknown>, missionId: string): Promise<string | null> {

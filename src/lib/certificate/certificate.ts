@@ -1,5 +1,8 @@
-// Certificate of Appreciation PDF (FR-010, BR-12, DEC-008).
-// Shows name, mission, date and certificate ID only: no hours, no AIU logo, no signature.
+// Certificate of Appreciation PDF (FR-010, BR-12, DEC-008, DEC-063).
+// Shows name, mission, date and certificate ID: no hours, no AIU logo, no signature.
+// DEC-063 adds, per mission: one of three preset designs (designs.ts), an accent colour, an optional
+// one-line description of the volunteering role, and the Voluntree logo on a dark badge. With none of
+// these set, the Classic design is drawn exactly as before.
 //
 // Uses the standard PDF fonts (Times, Helvetica), so no font file is needed.
 // They support Latin characters only (the WinAnsi set: English letters, digits,
@@ -9,6 +12,7 @@
 // are rejected, and runs of spaces are collapsed to one space.
 
 import { PDFDocument, PDFFont, StandardFonts, degrees, rgb } from "pdf-lib";
+import { CERTIFICATE_ACCENTS, DESCRIPTION_MAX, type CertificateAccent, type CertificateTemplate } from "./designs";
 
 export interface CertificateInput {
   studentName: string;
@@ -16,6 +20,14 @@ export interface CertificateInput {
   /** Calendar date as "YYYY-MM-DD", e.g. "2026-11-02". */
   date: string;
   certificateId: string;
+  /** Preset design (DEC-063). Default "classic". */
+  template?: CertificateTemplate;
+  /** Accent colour (DEC-063). Default "green", today's colour. */
+  accent?: CertificateAccent;
+  /** One line about the volunteering role, the same for everyone on the mission. Empty means none. */
+  description?: string | null;
+  /** The Voluntree logo as PNG bytes, drawn on a dark badge (DEC-063). Omitted means no logo. */
+  logo?: Uint8Array;
 }
 
 export const CERTIFICATE_TITLE = "Certificate of Appreciation";
@@ -49,11 +61,29 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+/** Modern: width of the colour band on the left. */
+const BAND_WIDTH = 176;
+/** With a description, the mission moves up a little and the description sits under it. */
+const MISSION_BOX_WITH_DESCRIPTION = { ...MISSION_BOX, centerY: 240 };
+const DESCRIPTION_BOX = { centerY: 191, height: 28, maxSize: 11, minSize: 8, maxLines: 2 };
+const LOGO_BADGE_GREEN = rgb(0.12, 0.23, 0.15); // #1F3A26: dark enough for the cream roots
+
 export async function generateCertificatePdf(input: CertificateInput): Promise<Uint8Array> {
   const studentName = cleanText(input.studentName, "Student name");
   const missionTitle = cleanText(input.missionTitle, "Mission title");
   const certificateId = cleanText(input.certificateId, "Certificate ID");
   const displayDate = formatDate(input.date);
+  const template = input.template ?? "classic";
+  // Green is today's colour, so the default draws exactly as before.
+  const accent = !input.accent || input.accent === "green" ? GREEN : hexToRgb(CERTIFICATE_ACCENTS[input.accent]);
+  const description = input.description?.trim() ? cleanText(input.description, "Description") : null;
+  if (description && description.length > DESCRIPTION_MAX) {
+    throw new RangeError(`Description must be at most ${DESCRIPTION_MAX} characters.`);
+  }
+  // Classic and Minimal are centred on the page; Modern on the area right of its colour band.
+  const centerX = template === "modern" ? BAND_WIDTH + (PAGE_WIDTH - BAND_WIDTH) / 2 : PAGE_WIDTH / 2;
+  const textWidth = template === "modern" ? 560 : TEXT_BOX_WIDTH;
+  const lineColor = template === "classic" ? GOLD : accent;
 
   const doc = await PDFDocument.create();
   doc.setTitle(`${CERTIFICATE_TITLE} – ${certificateId}`);
@@ -70,34 +100,60 @@ export async function generateCertificatePdf(input: CertificateInput): Promise<U
     ["Student name", studentName],
     ["Mission title", missionTitle],
     ["Certificate ID", certificateId],
+    ...(description ? [["Description", description]] : []),
   ]) {
     checkSupportedCharacters(text, label, bodyFont);
   }
 
-  // Gold double border.
-  page.drawRectangle({
-    x: 24, y: 24, width: PAGE_WIDTH - 48, height: PAGE_HEIGHT - 48,
-    borderColor: GOLD, borderWidth: 3,
-  });
-  page.drawRectangle({
-    x: 34, y: 34, width: PAGE_WIDTH - 68, height: PAGE_HEIGHT - 68,
-    borderColor: GOLD, borderWidth: 1,
-  });
+  // The frame: the only part that differs between the three presets.
+  if (template === "classic") {
+    // Gold double border.
+    page.drawRectangle({
+      x: 24, y: 24, width: PAGE_WIDTH - 48, height: PAGE_HEIGHT - 48,
+      borderColor: GOLD, borderWidth: 3,
+    });
+    page.drawRectangle({
+      x: 34, y: 34, width: PAGE_WIDTH - 68, height: PAGE_HEIGHT - 68,
+      borderColor: GOLD, borderWidth: 1,
+    });
+  } else if (template === "modern") {
+    // A full-height colour band on the left.
+    page.drawRectangle({ x: 0, y: 0, width: BAND_WIDTH, height: PAGE_HEIGHT, color: accent });
+  } else {
+    // Minimal: one thin accent line at the top and one at the bottom.
+    for (const y of [552, 43]) {
+      page.drawLine({ start: { x: 60, y }, end: { x: PAGE_WIDTH - 60, y }, thickness: 2, color: accent });
+    }
+  }
 
-  // Title and a short gold rule under it.
-  drawCentered(page, CERTIFICATE_TITLE, titleFont, 40, 470, GREEN);
-  drawRule(page, 448, 140, 1.5);
+  // Title and a short rule under it.
+  drawCenteredAt(page, CERTIFICATE_TITLE, titleFont, template === "classic" ? 40 : 36, centerX, 470,
+    template === "classic" ? accent : DARK);
+  drawRule(page, 448, 140, 1.5, centerX, lineColor);
 
-  drawCentered(page, "This certificate is presented to", bodyFont, 14, 410, GREY);
-  drawBlock(page, studentName, nameFont, NAME_BOX, DARK);
+  drawCenteredAt(page, "This certificate is presented to", bodyFont, 14, centerX, 410, GREY);
+  drawBlock(page, studentName, nameFont, NAME_BOX, DARK, centerX, textWidth);
 
-  drawCentered(page, "for volunteering in the mission", bodyFont, 14, 282, GREY);
-  drawBlock(page, missionTitle, missionFont, MISSION_BOX, GREEN);
+  drawCenteredAt(page, "for volunteering in the mission", bodyFont, 14, centerX, 282, GREY);
+  drawBlock(page, missionTitle, missionFont, description ? MISSION_BOX_WITH_DESCRIPTION : MISSION_BOX, accent, centerX, textWidth);
+  if (description) {
+    const descriptionFont = await doc.embedFont(StandardFonts.HelveticaOblique);
+    drawBlock(page, description, descriptionFont, DESCRIPTION_BOX, GREY, centerX, textWidth);
+  }
+
+  if (input.logo) {
+    // Modern: in the colour band; Classic and Minimal: top left, inside the frame.
+    const badge = template === "modern" ? { x: BAND_WIDTH / 2, y: 470, r: 44 } : { x: 88, y: 508, r: 28 };
+    page.drawCircle({ x: badge.x, y: badge.y, size: badge.r, color: LOGO_BADGE_GREEN });
+    const image = await doc.embedPng(input.logo);
+    const side = badge.r * 1.45;
+    page.drawImage(image, { x: badge.x - side / 2, y: badge.y - side / 2, width: side, height: side });
+  }
 
   // Footer: date on the left, certificate ID on the right.
-  drawRule(page, 168, 520, 0.75);
-  const leftX = PAGE_WIDTH / 2 - FOOTER_COLUMN_OFFSET;
-  const rightX = PAGE_WIDTH / 2 + FOOTER_COLUMN_OFFSET;
+  drawRule(page, 168, 520, 0.75, centerX, lineColor);
+  const leftX = centerX - FOOTER_COLUMN_OFFSET;
+  const rightX = centerX + FOOTER_COLUMN_OFFSET;
   drawCenteredAt(page, "DATE", labelFont, 9, leftX, 138, GREY);
   drawCenteredAt(page, displayDate, bodyFont, 13, leftX, 120, DARK);
   drawCenteredAt(page, "CERTIFICATE ID", labelFont, 9, rightX, 138, GREY);
@@ -210,17 +266,21 @@ function drawCenteredAt(
   page.drawText(text, { x: centerX - width / 2, y, size, font, color });
 }
 
-function drawCentered(page: Page, text: string, font: PDFFont, size: number, y: number, color: Color): void {
-  drawCenteredAt(page, text, font, size, PAGE_WIDTH / 2, y, color);
+function drawRule(
+  page: Page, y: number, width: number, thickness: number, centerX = PAGE_WIDTH / 2, color: Color = GOLD,
+): void {
+  page.drawLine({
+    start: { x: centerX - width / 2, y },
+    end: { x: centerX + width / 2, y },
+    thickness,
+    color,
+  });
 }
 
-function drawRule(page: Page, y: number, width: number, thickness: number): void {
-  page.drawLine({
-    start: { x: (PAGE_WIDTH - width) / 2, y },
-    end: { x: (PAGE_WIDTH + width) / 2, y },
-    thickness,
-    color: GOLD,
-  });
+/** "#2E7D32" → pdf-lib colour. */
+function hexToRgb(hex: string): Color {
+  const n = parseInt(hex.slice(1), 16);
+  return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
 }
 
 /** Draws wrapped, centred lines, vertically centred in the block's reserved space. */
@@ -230,12 +290,14 @@ function drawBlock(
   font: PDFFont,
   box: { centerY: number; height: number; maxSize: number; minSize: number; maxLines: number },
   color: Color,
+  centerX = PAGE_WIDTH / 2,
+  maxWidth = TEXT_BOX_WIDTH,
 ): void {
-  const { size, lines } = fitText(text, font, { ...box, maxWidth: TEXT_BOX_WIDTH });
+  const { size, lines } = fitText(text, font, { ...box, maxWidth });
   const lineGap = size * LINE_HEIGHT;
   // Baseline of the first line, so the group of lines sits in the middle of the box.
   const firstBaseline = box.centerY + ((lines.length - 1) * lineGap) / 2 - size * 0.35;
-  lines.forEach((line, i) => drawCentered(page, line, font, size, firstBaseline - i * lineGap, color));
+  lines.forEach((line, i) => drawCenteredAt(page, line, font, size, centerX, firstBaseline - i * lineGap, color));
 }
 
 /** Diagonal watermark across the middle of the page, drawn last so it sits on top. */
