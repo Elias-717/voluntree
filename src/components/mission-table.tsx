@@ -60,7 +60,13 @@ export function MissionTable({ missions, base }: { missions: StaffMission[]; bas
                     </span>
                   ) : <span className="text-muted">None</span>}
                 </td>
-                <td className="px-5 py-3 text-right">
+                <td className="space-x-2 whitespace-nowrap px-5 py-3 text-right">
+                  {/* Published missions can be edited until they start (DEC-057). */}
+                  {m.status === "PUBLISHED" && m.starts_at && new Date(m.starts_at) > new Date() && (
+                    <Link href={`${base}/new?id=${m.id}`} className="rounded-full px-3 py-2 font-medium text-muted hover:text-text">
+                      Edit
+                    </Link>
+                  )}
                   <Link href={draft ? `${base}/new?id=${m.id}` : `${base}/mission/${m.id}`}
                     className={`rounded-full px-4 py-2 font-medium ${m.toReview > 0 ? "bg-primary text-on-primary" : "border border-strong"}`}>
                     {draft ? "Edit" : m.toReview > 0 ? "Review" : "Open"}

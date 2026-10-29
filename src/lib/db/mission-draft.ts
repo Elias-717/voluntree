@@ -10,13 +10,16 @@ const timeOf = (iso: string) =>
   new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso));
 
 export async function loadDraft(supabase: SupabaseClient, id: string | undefined) {
-  if (!id) return { draft: undefined, locked: false };
-  const [{ data }, { count }] = await Promise.all([
+  if (!id) return { draft: undefined, locked: false, held: 0, published: false, started: false };
+  const [{ data }, { data: assignments }] = await Promise.all([
     supabase.from("missions").select(MISSION_COLUMNS).eq("id", id).maybeSingle(),
-    supabase.from("mission_assignments").select("id", { count: "exact", head: true }).eq("mission_id", id),
+    supabase.from("mission_assignments").select("status").eq("mission_id", id),
   ]);
-  if (!data) return { draft: undefined, locked: false };
+  if (!data) return { draft: undefined, locked: false, held: 0, published: false, started: false };
   const m = data as MissionRow;
+  const rows = (assignments ?? []) as { status: string }[];
+  // Students holding a spot (pending dean approval or accepted). Any one locks the date and time (DEC-057).
+  const held = rows.filter((a) => a.status !== "DEAN_REJECTED").length;
   const draft: MissionDraft = {
     id: m.id,
     title: m.title ?? "",
@@ -32,5 +35,11 @@ export async function loadDraft(supabase: SupabaseClient, id: string | undefined
     minCgpa: m.min_cgpa === null ? null : Number(m.min_cgpa),
     dean: m.dean_approval_required,
   };
-  return { draft, locked: (count ?? 0) > 0 };
+  return {
+    draft,
+    locked: rows.length > 0,
+    held,
+    published: m.status === "PUBLISHED",
+    started: m.starts_at !== null && new Date(m.starts_at) <= new Date(),
+  };
 }

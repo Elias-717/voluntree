@@ -2,8 +2,9 @@
 // and one certificate, exactly once); absent rejects. Admins can also revoke with a reason (FR-010).
 // Attendance opens when the mission starts (DEC-052). QR check-in shows who is here; staff still approve.
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, GraduationCap, Hourglass, Phone, QrCode, X } from "@phosphor-icons/react/ssr";
+import { Check, GraduationCap, Hourglass, PencilSimple, Phone, QrCode, X } from "@phosphor-icons/react/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatDayTime, formatTime } from "@/lib/format";
 import { MISSION_COLUMNS, type MissionRow } from "@/lib/db/student";
@@ -53,6 +54,13 @@ export async function AttendanceReview({ supabase, missionId, admin }: { supabas
         <h1 className="text-3xl font-semibold tracking-[-0.03em]">{m.title}</h1>
         <div className="flex flex-wrap items-start gap-2">
           {checkInOpen && <CheckInPanel missionId={m.id} title={m.title} checkedIn={checkedIn} confirmed={confirmed} />}
+          {/* Published missions can be edited until they start (DEC-057). */}
+          {m.status === "PUBLISHED" && !started && (
+            <Link href={`${admin ? "/admin" : "/organizer"}/new?id=${m.id}`}
+              className="inline-flex items-center gap-2 rounded-full border border-strong px-4 py-2 text-sm font-medium">
+              <PencilSimple size={18} aria-hidden /> Edit
+            </Link>
+          )}
           {m.status === "PUBLISHED" && <CancelButton missionId={m.id} draft={false} />}
         </div>
       </div>
