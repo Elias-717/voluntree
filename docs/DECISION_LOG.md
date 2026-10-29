@@ -412,3 +412,11 @@ Rules:
 - Reason: Approved by Elias after a published mission did not reach a demo student whose declared availability covered other days; there is no screen to declare availability, so the filter hid missions for no reason the student could see or fix.
 - Decided by: Elias
 - Supersedes: the availability parts of DEC-036
+
+### DEC-049 — LLM intake moves from Gemini to Groq
+- Date: 2026-10-29
+- Change: mission intake (FR-023) calls Groq instead of Google Gemini. Model `openai/gpt-oss-120b`, through Groq's OpenAI-compatible chat completions endpoint with plain `fetch` and JSON mode; no SDK. `@google/genai` is uninstalled and `GEMINI_API_KEY` is replaced by `GROQ_API_KEY` (server only). The prompt now gives today's weekday as well as the date (prompt version `intake-v2`), because without it the model sometimes turned "next Saturday" into a Friday. Everything else in DEC-046 stays: Zod validation, redaction of emails and phone numbers, blanks flagged, AI-generated label, `ai_usage_log`, manual form as fallback, nothing published automatically.
+- Affects: `src/lib/intake/draft.ts`, `.env.example`, `package.json` and lockfile, AGENTS.md §4 stack and §6 Q8; Vercel environment variables.
+- Reason: Approved by Elias; the Gemini project had no free tier and needed billing. Of the Groq models available to the key, a live test with a synthetic announcement showed only `openai/gpt-oss-120b` resolved "next Saturday" correctly (`openai/gpt-oss-20b` gave a Friday, `qwen/qwen3.8-27b` the week after); with the weekday in the prompt it was correct 5 times out of 5.
+- Decided by: Elias
+- Supersedes: the provider and model parts of DEC-046
