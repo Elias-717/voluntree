@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { matchStudentsToMission } from "../../src/lib/matching/matching";
-import { ENGAGED_BONUS_CAP, SKILLS, generateScenario } from "./generate";
+import { ENGAGED_BONUS_CAP, SKILLS, applyConfiguration, generateScenario } from "./generate";
 
 const SEED = 20261028;
 
@@ -104,5 +104,82 @@ describe("generateScenario", () => {
   it("rejects impossible options", () => {
     expect(() => generateScenario(SEED, { missions: 30 })).toThrow(RangeError);
     expect(() => generateScenario(SEED, { missions: 4, gatedMissions: 5 })).toThrow(RangeError);
+  });
+});
+
+describe("applyConfiguration", () => {
+  const base = generateScenario(SEED);
+  const live = applyConfiguration(base, "live");
+
+  it("returns the future configuration unchanged", () => {
+    expect(applyConfiguration(base, "future")).toBe(base);
+    expect(base.configuration).toBe("future");
+  });
+
+  it("gives the live configuration no skills, no declared availability and no reliability data", () => {
+    expect(live.configuration).toBe("live");
+    expect(live.missions.every((m) => m.requiredSkills.length === 0)).toBe(true);
+    expect(live.students.every((s) => s.availability.length === 0)).toBe(true);
+    expect(live.students.every((s) => s.reliability === null)).toBe(true);
+  });
+
+  it("keeps everything else from the same generated scenario", () => {
+    live.missions.forEach((m, i) => expect({ ...m, requiredSkills: base.missions[i].requiredSkills }).toEqual(base.missions[i]));
+    live.students.forEach((s, i) =>
+      expect({ ...s, availability: base.students[i].availability, reliability: base.students[i].reliability }).toEqual(
+        base.students[i],
+      ),
+    );
+    expect(live.history).toEqual(base.history);
+    expect(live.arrivalRandom).toEqual(base.arrivalRandom);
+    expect(live.arrivalEngaged).toEqual(base.arrivalEngaged);
+    expect(live.seed).toBe(base.seed);
+  });
+
+  it("keeps a student interested only in missions they can attend (self-selection)", () => {
+    const byId = new Map(base.students.map((s) => [s.id, s]));
+    for (const m of base.missions) {
+      expect(live.interest[m.id].every((id) => base.interest[m.id].includes(id))).toBe(true);
+      for (const id of base.interest[m.id]) {
+        const student = byId.get(id)!;
+        const open = { ...m, eligibleSchools: [], minCgpa: null };
+        const unavailable = matchStudentsToMission(open, [{ ...student, commitments: [] }]).exclusions.some((e) =>
+          e.reasons.includes("NOT_AVAILABLE"),
+        );
+        expect(live.interest[m.id].includes(id)).toBe(!unavailable);
+      }
+    }
+    // Students who never entered availability count as free.
+    const unknown = base.students.filter((s) => s.availability.length === 0).map((s) => s.id);
+    for (const m of base.missions) {
+      for (const id of base.interest[m.id].filter((x) => unknown.includes(x))) expect(live.interest[m.id]).toContain(id);
+    }
+  });
+
+  it("makes the unchanged engine use opportunity balance 80% and reliability 20%", () => {
+    for (const mission of live.missions) {
+      for (const rec of matchStudentsToMission(mission, live.students).recommendations) {
+        expect(rec.factors.map((f) => [f.name, f.weight])).toEqual([
+          ["opportunityBalance", 20 / 25],
+          ["reliability", 5 / 25],
+        ]);
+        expect(rec.factors[1].value).toBe(0.5); // the same for everyone
+      }
+    }
+  });
+
+  it("ranks the same when missions list skills but students have none (the README's claim)", () => {
+    const noSkills = live.students.map((st) => ({ ...st, skills: [] }));
+    for (let i = 0; i < live.missions.length; i++) {
+      const order = (m: (typeof live.missions)[number]) =>
+        matchStudentsToMission(m, noSkills).recommendations.map((r) => r.studentId);
+      expect(order({ ...live.missions[i], requiredSkills: base.missions[i].requiredSkills })).toEqual(order(live.missions[i]));
+    }
+  });
+
+  it("does not change the scenario it is given", () => {
+    const before = structuredClone(base);
+    applyConfiguration(base, "live");
+    expect(base).toEqual(before);
   });
 });

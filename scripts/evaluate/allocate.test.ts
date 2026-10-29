@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Mission, Student } from "../../src/types/domain";
 import { BASE_WEIGHTS, matchStudentsToMission } from "../../src/lib/matching/matching";
 import { METHODS, allocate, missionsInOrder } from "./allocate";
-import { generateScenario, type Scenario } from "./generate";
+import { applyConfiguration, generateScenario, type Scenario } from "./generate";
 import { countTimeConflicts, populations } from "./metrics";
 
 const at = (day: number, time: string) => `2026-11-0${day}T${time}:00+08:00`;
@@ -42,6 +42,7 @@ function scenarioOf(students: Student[], missions: Mission[], arrival: string[])
   const ids = students.map((s) => s.id);
   return {
     seed: 1,
+    configuration: "future",
     options: { students: ids.length, missions: missions.length, interestProbability: 1, gatedMissions: 0, history: "skewed" },
     students,
     missions,
@@ -125,8 +126,8 @@ describe("allocate: simple cases", () => {
   });
 });
 
-describe("allocate: generated scenario", () => {
-  const scenario = generateScenario(20261028);
+describe.each(["future", "live"] as const)("allocate: generated scenario (%s configuration)", (configuration) => {
+  const scenario = applyConfiguration(generateScenario(20261028), configuration);
   const pops = populations(scenario);
   const missionById = new Map(scenario.missions.map((m) => [m.id, m]));
 
@@ -157,6 +158,14 @@ describe("allocate: generated scenario", () => {
       expect(allocate(scenario, method)).toEqual(allocate(scenario, method));
     }
     expect(scenario).toEqual(before);
+  });
+
+  it("ranks Voluntree's live pools by fewest approved participations (reliability is constant)", () => {
+    if (configuration !== "live") return;
+    const first = missionsInOrder(scenario.missions)[0];
+    const pool = matchStudentsToMission(first, scenario.students.filter((s) => scenario.interest[first.id].includes(s.id)));
+    const history = pool.recommendations.map((r) => scenario.history[r.studentId]);
+    expect(history).toEqual([...history].sort((a, b) => a - b));
   });
 
   it("uses the unchanged DEC-036 base weights from the matching engine", () => {

@@ -5,6 +5,7 @@
 // interest and arrival times; only the starting history changes.
 
 import type { Mission, School, Student } from "../../src/types/domain";
+import { matchStudentsToMission } from "../../src/lib/matching/matching";
 import { createRandom } from "./random";
 
 export const SKILLS = [
@@ -55,8 +56,16 @@ export const DEFAULT_OPTIONS: ScenarioOptions = {
   history: "skewed",
 };
 
+/**
+ * "future": students declare skills and availability, missions list required skills (the
+ * original Task 4 simulation). "live": the app as it runs now (DEC-048): no declared skills,
+ * no declared availability and no reliability data. See applyConfiguration.
+ */
+export type Configuration = "live" | "future";
+
 export interface Scenario {
   seed: number;
+  configuration: Configuration;
   options: ScenarioOptions;
   /** recentOpportunities holds the historical count; commitments start empty. */
   students: Student[];
@@ -202,7 +211,42 @@ export function generateScenario(seed: number, overrides: Partial<ScenarioOption
     );
   }
 
-  return { seed, options, students, missions, history, interest, arrivalRandom, arrivalEngaged };
+  return { seed, configuration: "future", options, students, missions, history, interest, arrivalRandom, arrivalEngaged };
+}
+
+/**
+ * The same generated scenario under one configuration. "future" returns it unchanged.
+ * "live" returns a copy that matches what the app passes to matching today:
+ * - every mission lists no required skills, so the skill factor is left out;
+ * - every student has availability [] (DEC-048), so matching excludes no one for availability;
+ * - every student has reliability null, so everyone gets the neutral 0.5 (no reliability data yet).
+ * Students still accept only missions they can attend (DEC-048). That is modelled as
+ * self-selection, not as a matching filter: a student stays interested in a mission only if their
+ * generated windows cover it (or they never entered any, which counts as free). The test is the
+ * matching engine's own availability rule, so it is the same rule the future configuration uses.
+ * Students, missions, history, school, CGPA, capacity and arrival orders are otherwise unchanged.
+ */
+export function applyConfiguration(scenario: Scenario, configuration: Configuration): Scenario {
+  if (configuration === "future") return scenario;
+
+  const byId = new Map(scenario.students.map((s) => [s.id, s]));
+  const interest: Record<string, string[]> = {};
+  for (const mission of scenario.missions) {
+    const open = { ...mission, acceptedCount: 0, eligibleSchools: [], minCgpa: null };
+    interest[mission.id] = scenario.interest[mission.id].filter((id) => {
+      const student = { ...byId.get(id)!, commitments: [], matchingOptOut: false };
+      const { exclusions } = matchStudentsToMission(open, [student]);
+      return !exclusions.some((e) => e.reasons.includes("NOT_AVAILABLE"));
+    });
+  }
+
+  return {
+    ...scenario,
+    configuration: "live",
+    missions: scenario.missions.map((m) => ({ ...m, requiredSkills: [] })),
+    students: scenario.students.map((s) => ({ ...s, availability: [], reliability: null })),
+    interest,
+  };
 }
 
 /** "2026-11-03T09:00:00+08:00" for day 3, hour 9 (AIU local time). */
