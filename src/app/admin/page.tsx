@@ -33,11 +33,12 @@ export default async function AdminOverview() {
   const [missions, { data: students }, { data: approvals }, { data: pending }, { count: certificates }, { data: activity }] =
     await Promise.all([
       loadStaffMissions(supabase),
-      supabase.from("profiles").select("id").eq("role", "student").is("deactivated_at", null),
+      // Guests (DEC-055) are left out so the demo numbers stay stable.
+      supabase.from("profiles").select("id").eq("role", "student").is("deactivated_at", null).eq("is_guest", false),
       supabase.from("completions").select("mission_assignments!inner(student_id)").eq("status", "APPROVED"),
       supabase.from("mission_assignments").select("applied_at, missions!inner(status)").eq("status", "PENDING_DEAN_APPROVAL").neq("missions.status", "CANCELLED").order("applied_at"),
       supabase.from("certificates").select("id, completions!inner(mission_assignments!inner(missions!inner(status)))", { count: "exact", head: true }).eq("status", "VALID").neq("completions.mission_assignments.missions.status", "CANCELLED"),
-      supabase.from("audit_events").select("id, action, created_at, profiles(display_name, deactivated_at)").order("created_at", { ascending: false }).limit(20),
+      supabase.from("audit_events").select("id, action, created_at, profiles(display_name, deactivated_at, is_guest)").order("created_at", { ascending: false }).limit(40),
     ]);
 
   const activeIds = new Set((students ?? []).map((s) => s.id as string));
@@ -54,8 +55,8 @@ export default async function AdminOverview() {
   const open = published.filter((m) => new Date(m.starts_at) > new Date());
   const gated = missions.filter((m) => m.eligible_schools.length > 0 || m.min_cgpa !== null).length;
   const recent = ((activity ?? []) as unknown as {
-    id: number; action: string; created_at: string; profiles: { display_name: string; deactivated_at: string | null } | null;
-  }[]).filter((e) => e.profiles && !e.profiles.deactivated_at).slice(0, 6);
+    id: number; action: string; created_at: string; profiles: { display_name: string; deactivated_at: string | null; is_guest: boolean } | null;
+  }[]).filter((e) => e.profiles && !e.profiles.deactivated_at && !e.profiles.is_guest).slice(0, 6);
 
   return (
     <>
@@ -107,7 +108,7 @@ export default async function AdminOverview() {
 
         <section className="rounded-[22px] border border-line bg-card p-5">
           <h2 className="font-semibold">Recent activity</h2>
-          <ul className="mt-3 divide-y divide-line text-sm">
+          <ul className="stagger mt-3 divide-y divide-line text-sm">
             {recent.length === 0 && <li className="py-3 text-muted">Nothing yet.</li>}
             {recent.map((e) => (
               <li key={e.id} className="flex justify-between gap-3 py-3">

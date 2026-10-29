@@ -1,12 +1,21 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState } from "react";
 import { signInWithEmail } from "./actions";
 
 export function EmailForm() {
   const [error, formAction, pending] = useActionState(signInWithEmail, null);
   return (
-    <form action={formAction} className="mt-6 flex flex-col gap-4">
+    // Submitting through onSubmit, not the action prop, keeps the typed email after a wrong password:
+    // React resets a form after an action prop runs.
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget);
+        startTransition(() => formAction(data));
+      }}
+      className="mt-6 flex flex-col gap-4"
+    >
       <label className="flex flex-col gap-1.5 text-sm">
         Email
         <input name="email" type="email" required autoComplete="email" placeholder="you@student.aiu.edu.my"
