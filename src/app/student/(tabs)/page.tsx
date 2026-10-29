@@ -71,7 +71,7 @@ export default async function StudentHome() {
           Nothing matches right now. New missions appear here as organizers publish them.
         </p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-3">
+        <ul className="stagger mt-3 flex flex-col gap-3">
           {forYou.map(({ row, spotsLeft }) => (
             <li key={row.id}>
               <Link href={`/student/mission/${row.id}`} className="block rounded-[22px] border border-line bg-card p-4">

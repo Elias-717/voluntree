@@ -23,7 +23,7 @@ export function MissionTable({ missions, base }: { missions: StaffMission[]; bas
             <th className="px-5 py-3" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-line">
+        <tbody className="stagger divide-y divide-line">
           {missions.map((m) => {
             const draft = m.status === "DRAFT";
             return (

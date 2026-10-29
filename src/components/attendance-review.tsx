@@ -82,7 +82,7 @@ export async function AttendanceReview({ supabase, missionId, admin }: { supabas
               <th className="px-5 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="stagger divide-y divide-line">
             {rows.length === 0 && (
               <tr><td colSpan={4} className="px-5 py-6 text-muted">No students have joined yet.</td></tr>
             )}

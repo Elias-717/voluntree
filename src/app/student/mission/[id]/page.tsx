@@ -76,7 +76,7 @@ export default async function MissionPage({ params }: PageProps<"/student/missio
       {recommendation && (
         <section className="mt-5 rounded-[22px] border border-line bg-card p-4">
           <h2 className="font-semibold">Why recommended</h2>
-          <ul className="mt-2 flex flex-col gap-2 text-sm">
+          <ul className="stagger mt-2 flex flex-col gap-2 text-sm">
             {recommendation.factors.map((f) => (
               <li key={f.name} className="flex items-start justify-between gap-3">
                 <span className="text-muted">{f.explanation}</span>

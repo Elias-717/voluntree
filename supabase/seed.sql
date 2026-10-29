@@ -1,8 +1,8 @@
 -- Demo seed (SRS §14, DEC-021). Synthetic data only: no real students.
 -- 1 admin, 1 organizer, 8 students with mixed schools and CGPAs (one with none),
--- and varied past participation (0, 0, 1, 2, 4, 6, 9, 11) seeded as real completed
+-- and varied past participation (0, 0, 1, 5, 4, 6, 9, 11) seeded as real completed
 -- missions with ledger entries and certificates. The demo student, Farid, starts at
--- 2 waterings, so the approval in demo step 6 grows his tree to sprout.
+-- 5 waterings (already a sprout, DEC-056), so the approval in demo step 6 grows his tree to sapling.
 --
 -- Run once on an empty database, after the migrations:
 --   1. node supabase/seed-users.mjs   (creates the logins; the password stays in .env.local)
@@ -84,7 +84,7 @@ insert into seed_history values
   ('00000000-0000-4000-a000-000000000011', 0),
   ('00000000-0000-4000-a000-000000000012', 0),
   ('00000000-0000-4000-a000-000000000013', 1),
-  ('00000000-0000-4000-a000-000000000014', 2),
+  ('00000000-0000-4000-a000-000000000014', 5),
   ('00000000-0000-4000-a000-000000000015', 4),
   ('00000000-0000-4000-a000-000000000016', 6),
   ('00000000-0000-4000-a000-000000000017', 9),
