@@ -1,13 +1,12 @@
-// LLM mission intake (FR-023, DEC-039). Server-only: the Gemini key never reaches the browser.
+// LLM mission intake (FR-023, DEC-039, DEC-049). Server-only: the Groq key never reaches the browser.
 // The model only drafts. A person reviews every field and publishes; nothing is published automatically.
 // Missing or unclear details come back as null and are flagged, never invented.
 
 import { createHash } from "node:crypto";
-import { GoogleGenAI } from "@google/genai";
 import { z } from "zod";
 
-export const INTAKE_MODEL = "gemini-2.5-flash";
-export const INTAKE_VERSION = "intake-v1";
+export const INTAKE_MODEL = "openai/gpt-oss-120b";
+export const INTAKE_VERSION = "intake-v2";
 
 const MAX_INPUT = 6000;
 
@@ -34,7 +33,7 @@ export function redact(text: string): string {
 export function buildPrompt(announcement: string, today: string): string {
   return [
     "You turn a university event announcement into a volunteer mission draft for AIU in Malaysia.",
-    `Today is ${today} (Malaysia time). Resolve relative dates like "next Saturday" against today.`,
+    `Today is ${today}, a ${weekdayOf(today)} (Malaysia time). Resolve relative dates like "next Saturday" against today.`,
     "Return JSON only, with exactly these keys:",
     '{"title": string|null, "description": string|null, "place": string|null, "skills": string[], "date": "YYYY-MM-DD"|null, "start": "HH:MM"|null, "end": "HH:MM"|null, "capacity": integer|null}',
     "Rules:",
@@ -52,6 +51,11 @@ export function buildPrompt(announcement: string, today: string): string {
   ].join("\n");
 }
 
+/** "Thursday" for "2026-10-29". Models get relative dates wrong when they must work out the weekday themselves. */
+function weekdayOf(date: string): string {
+  return new Date(`${date}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
+}
+
 export function hashPrompt(prompt: string): string {
   return createHash("sha256").update(prompt).digest("hex");
 }
@@ -65,16 +69,22 @@ export function blanksOf(draft: Draft): string[] {
   return names.filter(([key]) => draft[key] === null).map(([, label]) => label);
 }
 
-/** Calls Gemini and validates the answer. Throws when the model fails or returns something unusable. */
+/** Calls Groq (OpenAI-compatible API) and validates the answer. Throws when the model fails or returns something unusable. */
 export async function draftMission(announcement: string, today: string) {
   const text = redact(announcement.trim()).slice(0, MAX_INPUT);
   const prompt = buildPrompt(text, today);
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  const response = await ai.models.generateContent({
-    model: INTAKE_MODEL,
-    contents: prompt,
-    config: { responseMimeType: "application/json", temperature: 0.2 },
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: INTAKE_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      temperature: 0.2,
+    }),
   });
-  const parsed = DraftSchema.safeParse(JSON.parse(response.text ?? "null"));
+  if (!response.ok) throw new Error(`Groq returned ${response.status}`);
+  const body = await response.json();
+  const parsed = DraftSchema.safeParse(JSON.parse(body.choices?.[0]?.message?.content ?? "null"));
   return { prompt, draft: parsed.success ? parsed.data : null };
 }

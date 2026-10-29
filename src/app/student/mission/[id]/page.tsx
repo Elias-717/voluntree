@@ -34,7 +34,6 @@ export default async function MissionPage({ params }: PageProps<"/student/missio
   const recommendation = upcoming
     ? recommendMissionsForStudent(student, [toMission(row, held.get(row.id) ?? 0)])[0] ?? null
     : null;
-  const confirmFirst = recommendation ? recommendation.availability !== "FULL" : true;
 
   return (
     <div className="flex flex-1 flex-col px-4 pb-6 pt-5">
@@ -105,13 +104,7 @@ export default async function MissionPage({ params }: PageProps<"/student/missio
             <p className="mb-3 text-center text-sm text-muted">
               {spotsLeft} of {row.capacity} spots left
             </p>
-            <AcceptButton
-              missionId={row.id}
-              full={spotsLeft === 0}
-              confirmFirst={confirmFirst}
-              when={`${formatDay(row.starts_at)}, ${formatTime(row.starts_at)} to ${formatTime(row.ends_at)}`}
-              place={row.place}
-            />
+            <AcceptButton missionId={row.id} full={spotsLeft === 0} />
           </>
         )}
       </div>

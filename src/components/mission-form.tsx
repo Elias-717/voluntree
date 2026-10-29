@@ -5,7 +5,7 @@
 // A new mission can start from an AI draft of a pasted announcement (FR-023); the person still
 // checks and edits every field, and nothing is published automatically.
 
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState } from "react";
 import { Check, Sparkle } from "@phosphor-icons/react";
 import type { School } from "@/types/domain";
 import { saveMission } from "@/lib/actions/staff";
@@ -45,7 +45,17 @@ export function MissionForm({ admin, draft: saved = {}, organizations = [], crit
   const [ai, setAi] = useState<{ blanks: string[]; version: number } | null>(null);
 
   return (
-    <form key={ai?.version ?? 0} action={formAction} className="grid gap-6 lg:grid-cols-[1fr_260px]">
+    // Submitting through onSubmit, not the action prop, keeps what was typed when saving fails:
+    // React resets a form after an action prop runs. The submitter carries the Publish or Save draft intent.
+    <form
+      key={ai?.version ?? 0}
+      onSubmit={(e) => {
+        e.preventDefault();
+        const data = new FormData(e.currentTarget, (e.nativeEvent as SubmitEvent).submitter);
+        startTransition(() => formAction(data));
+      }}
+      className="grid gap-6 lg:grid-cols-[1fr_260px]"
+    >
       {draft.id && <input type="hidden" name="id" value={draft.id} />}
       {ai && <input type="hidden" name="source" value="ai_draft" />}
       <div className="flex flex-col gap-4 rounded-[22px] border border-line bg-card p-5">
@@ -84,7 +94,7 @@ export function MissionForm({ admin, draft: saved = {}, organizations = [], crit
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Place"><input name="place" defaultValue={draft.place} className={input} /></Field>
-          <Field label="Skills (comma separated)"><input name="skills" defaultValue={draft.skills} placeholder="cleaning, teamwork" className={input} /></Field>
+          <Field label="Skills (optional, comma separated)"><input name="skills" defaultValue={draft.skills} placeholder="cleaning, teamwork" className={input} /></Field>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field label="Date"><input type="date" name="date" defaultValue={draft.date} className={input} /></Field>

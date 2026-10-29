@@ -27,7 +27,6 @@ export async function signInWithEmail(_state: string | null, form: FormData): Pr
 
 export async function signInAsDemo(who: keyof typeof DEMO_USERS) {
   const supabase = await createClient();
-  await supabase.auth.signOut();
   const { error } = await supabase.auth.signInWithPassword({
     email: DEMO_USERS[who],
     password: process.env.DEMO_PASSWORD ?? "",

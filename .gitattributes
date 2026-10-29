@@ -1,0 +1,2 @@
+# The evaluation test compares results.md byte for byte with a fresh run (FR-026).
+scripts/evaluate/results.md text eol=lf
