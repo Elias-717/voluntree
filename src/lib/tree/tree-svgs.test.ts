@@ -13,6 +13,24 @@ const SOIL =
 
 const MOTION_QUERY = "@media (prefers-reduced-motion: no-preference)";
 
+type Point = [number, number];
+
+/** The points of an "M x,y L x,y …" path. */
+function points(d: string): Point[] {
+  return [...d.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map((m) => [Number(m[1]), Number(m[2])]);
+}
+
+/** Whether a point lies inside a polygon (ray casting). */
+function inside([x, y]: Point, polygon: Point[]): boolean {
+  let result = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) result = !result;
+  }
+  return result;
+}
+
 // Each stage's file, found through the same path the screens use.
 const stages = TREE_STAGES.map((stage, i) => {
   const { imagePath } = getTreeStage(i * WATERINGS_PER_STAGE);
@@ -111,10 +129,36 @@ describe("tree stage SVGs", () => {
     expect(animatedGroups(sprout)).toBe(1); // a single spear leaf
     expect(animatedGroups(sapling)).toBe(4); // four fronds at ground level
     expect(sapling).not.toContain('fill="#8D5A3B"'); // no trunk
-    expect(young).toContain('fill="#8D5A3B"'); // a short ringed trunk…
-    expect(young).toContain('stroke="#A97B5B"'); // …with rings
+    expect(young).toContain('fill="#8D5A3B"'); // a short trunk (its scales are checked below)
     expect(animatedGroups(young)).toBe(5); // a small crown
     expect(full.match(/<ellipse cx="[\d.]+" cy="[\d.]+" rx="2.4" ry="3.2"/g)?.length).toBeGreaterThanOrEqual(20); // date clusters
     expect(animatedGroups(full)).toBe(11); // 8 fronds + 3 date clusters, each with its own timing
+  });
+
+  describe.each(["young-tree", "full-tree"])("%s trunk: diamond scales (DEC-051)", (name) => {
+    const svg = stages.find((s) => s.stage === name)!.svg;
+    const trunk = points(svg.match(/<path d="(M[^"]+) Z" fill="#8D5A3B"\/>/)![1]);
+    const grooves = [...svg.matchAll(/<path d="(M[^"]+)" fill="none" stroke="#5D4037" stroke-width="1.2"\/>/g)].map(
+      (m) => points(m[1]),
+    );
+
+    it("has darker grooves in two crossing diagonal directions", () => {
+      expect(grooves.length).toBeGreaterThanOrEqual(10);
+      // Going up the trunk, one family runs to the right and the other to the left.
+      const direction = (g: Point[]) => Math.sign((g[g.length - 1][0] - g[0][0]) * (g[0][1] - g[g.length - 1][1]));
+      const long = grooves.filter((g) => Math.abs(g[g.length - 1][0] - g[0][0]) > 2);
+      expect(long.filter((g) => direction(g) > 0).length).toBeGreaterThanOrEqual(5);
+      expect(long.filter((g) => direction(g) < 0).length).toBeGreaterThanOrEqual(5);
+    });
+
+    it("keeps every groove inside the trunk outline", () => {
+      for (const g of grooves) for (const p of g) expect(inside(p, trunk), `${p}`).toBe(true);
+    });
+
+    it("has no horizontal ring bands left (light brown strokes appear only on the date stalks)", () => {
+      for (const line of svg.split("\n").filter((l) => l.includes('stroke="#A97B5B"'))) {
+        expect(line).toContain('class="sway');
+      }
+    });
   });
 });
