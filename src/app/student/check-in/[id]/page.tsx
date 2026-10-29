@@ -1,5 +1,5 @@
 // QR check-in (FR-016, DEC-052): the link inside the organizer's QR opens this screen.
-// One tap records that the student is here; the organizer still approves attendance.
+// Opening the link checks the student in by itself (DEC-059); the organizer still approves attendance.
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
