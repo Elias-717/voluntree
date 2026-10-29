@@ -1,7 +1,7 @@
 // Screens 6 and 6b: my missions, upcoming and past, with an empty state.
 
 import Link from "next/link";
-import { CalendarBlank, Check, Drop, GraduationCap, Hourglass, MagnifyingGlass, X } from "@phosphor-icons/react/ssr";
+import { Check, Drop, GraduationCap, Hourglass, MagnifyingGlass, X } from "@phosphor-icons/react/ssr";
 import { MissionIcon } from "@/components/mission-icon";
 import { createClient } from "@/lib/db/server";
 import { requireRole } from "@/lib/db/session";
@@ -60,9 +60,8 @@ export default async function MyMissions({ searchParams }: PageProps<"/student/m
       <div className="flex items-center justify-between">
         <span className="size-11" />
         <h1 className="font-semibold">My missions</h1>
-        <span className="grid size-11 place-items-center rounded-full border border-line bg-card" aria-hidden>
-          <CalendarBlank size={20} />
-        </span>
+        {/* The inbox bell (tabs layout) sits here. */}
+        <span className="size-11" />
       </div>
 
       <nav className="mt-5 grid grid-cols-2 rounded-full bg-tint p-1 text-center text-sm font-medium" aria-label="Tabs">

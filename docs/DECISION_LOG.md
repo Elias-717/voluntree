@@ -492,3 +492,11 @@ Rules:
 - Reason: Approved by Elias; chose all four student event groups (status changes, approval and certificate, changes and cancellations, invitations) and staff notifications.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-059 — Scanning the QR checks in by itself
+- Date: 2026-10-29
+- Change: opening the check-in link from the QR now records the check-in straight away; the student no longer taps "I'm here" (DEC-052). The page shows "Checking you in…" and then "Checked in at …". "I'm here" stays only as a retry if the check-in fails (for example an expired code), with the error shown. The check-in runs in the browser after the page opens, never during a server render or a link preview. All database rules are unchanged: the code must be from the current or previous minute, the student must be confirmed on the mission, and a second scan changes nothing. Checking in still never approves attendance.
+- Affects: `src/app/student/check-in/[id]/` (button and page comment); DEC-052 step "tap I'm here".
+- Reason: Approved by Elias: scanning with the student's phone should be enough.
+- Decided by: Elias
+- Supersedes: the "tap I'm here" step of DEC-052
