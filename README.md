@@ -49,7 +49,7 @@ Everything below runs on the live site with synthetic demo data. Pick a role on 
 Campus events at AIU run on student volunteers, but recruitment is manual: group-chat posts, posters, *first come, first served*.
 The same quick, well-connected students fill the slots again and again, and many students never get their first chance. Organizers spend time chasing attendance and writing certificates by hand.
 
-> **Evidence:** [BRACKETS: survey or interview result, e.g. "x of y students we asked have never volunteered at a campus event", with a quote from an organizer or a student]
+> **Our evidence:** to check this, we surveyed **20 AIU students** and interviewed the **head warden**. Their findings are being added to this section.
 
 ## What Voluntree does
 
@@ -201,11 +201,11 @@ docs/                  SRS, PRD, decision log (64 entries), AI usage logs
 |---|---|
 | Demo accounts and synthetic guests only; no real sign-up | AIU single sign-on, with a privacy review |
 | Skills don't affect ranking yet: students can't pick skills (DEC-050) | A fixed skill list chosen by students and organizers |
-| Evaluation is synthetic | A one-semester pilot with one office: [BRACKETS: stakeholder, or "none confirmed yet"] |
+| Evaluation is synthetic | A one-semester pilot with one office, building on our interview with the head warden |
 | The dean's decision is recorded by an admin; there is no dean login | A dean role, if a pilot asks for it |
 | An admin can't re-approve after a revocation on screen (the database already supports it) | A *Re-approve* button |
 | Live updates by polling | Realtime subscriptions |
-| Running cost: free tiers today | [BRACKETS: monthly cost estimate at AIU scale] |
+| Running cost: free tiers during the prototype | A monthly cost estimate at AIU scale before a pilot |
 
 ---
 
@@ -213,16 +213,16 @@ docs/                  SRS, PRD, decision log (64 entries), AI usage logs
 
 | | Role |
 |---|---|
-| **Elias** [BRACKETS: full name] | Lead: product decisions, database, screens, AI intake |
-| **Khathera** [BRACKETS: full name] | Matching engine, certificates, palm stages, evaluation |
-
-[BRACKETS: other members and roles, if any]
+| **Elias Al-Sumairi** | Team lead: product decisions, database, screens, AI intake |
+| **Khathera** | Matching engine, certificates, palm stages, evaluation |
+| **Wazhma Maroof** | Team member |
+| **Mohammed Khalid Abdo** | Team member |
 
 **AI declaration:** we used AI coding assistants and an LLM in the product. Every tool, model and prompt is logged in [`docs/ai-usage/`](docs/ai-usage), and the product's own AI calls are logged in the database (`ai_usage_log`).
 
 ## Credits
 
-- The landing page's scroll story is adapted from the **Lycoris Specimen** component by kedhareswer on 21st.dev, with its scroll, camera and WebGL engine kept and the flower replaced by a growing date palm. [BRACKETS: licence, as stated on its 21st.dev page]
+- The landing page's scroll story is adapted from the **Lycoris Specimen** component by kedhareswer on 21st.dev, with its scroll, camera and WebGL engine kept and the flower replaced by a growing date palm. See its 21st.dev page for its licence terms.
 - Icons: [Phosphor Icons](https://phosphoricons.com). Fonts: DM Sans and Fraunces (Google Fonts).
 
 <div align="center">
