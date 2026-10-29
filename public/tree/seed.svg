@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <style>
+    @media (prefers-reduced-motion: no-preference) {
+      .sway { transform-box: view-box; transform-origin: 100px 176px; animation: sway 6s ease-in-out infinite alternate; }
+      .s1 { animation-duration: 6s; animation-delay: 0s; }
+      @keyframes sway { from { transform: rotate(-1.5deg); } to { transform: rotate(1.5deg); } }
+    }
+  </style>
   <ellipse cx="100" cy="182" rx="72" ry="12" fill="#795548"/>
   <ellipse cx="100" cy="176" rx="62" ry="6" fill="#5D4037"/>
-  <ellipse cx="100" cy="171" rx="11" ry="7" fill="#8D5A3B"/>
-  <ellipse cx="96" cy="168" rx="4" ry="2" fill="#A97B5B"/>
+  <g class="sway s1"><g transform="rotate(-8 100 171)"><ellipse cx="100" cy="170" rx="17" ry="7" fill="#8D5A3B"/><path d="M87,170 Q100,167.5 113,170" fill="none" stroke="#5D4037" stroke-width="1.5" stroke-linecap="round"/><ellipse cx="94" cy="167" rx="5" ry="1.8" fill="#A97B5B"/></g></g>
 </svg>

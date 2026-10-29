@@ -429,6 +429,14 @@ Rules:
 - Decided by: Elias
 - Supersedes: the skill part of the DEC-036 score weights, until the skill list exists
 
+### DEC-051 — The tree becomes a palm tree
+- Date: 2026-10-29
+- Change: the tree is drawn as a palm everywhere. Landing page (screen 0): the WebGL model is a palm whose trunk is covered in sharp-edged diamond scales (old frond bases, in crossing spirals) and carries a crown of 16 feather fronds, standing on a low round plinth (a specimen base) that widens with the trunk, from just wider than the young palm's foot to full size; scrolling first opens fronds at ground level, then the trunk rises and carries the crown up. Student screens: Khathera redraws the 5 stage SVGs as a palm's life (date seed, spear leaf, trunkless young palm, short-trunk palm, full palm with dates), with a gentle CSS sway that stops under reduced motion (`docs/team/KHATHERA.md` Task 5). Stage names, stage IDs, the 3-watering step and `getTreeStage` are unchanged, and "tree" stays the product word.
+- Affects: `src/components/growing-tree.tsx`; `public/tree/` (Khathera); FR-027 stage art; DEC-006 stage drawings.
+- Reason: Approved by Elias; a palm (date palm) fits the campus setting and its life stages read clearly.
+- Decided by: Elias
+- Supersedes: the drawing style of the DEC-006 stages
+
 ### DEC-052 — Attendance opens at the start; Mark all present; QR check-in
 - Date: 2026-10-29
 - Change: (1) Present and Absent appear once the mission has started, not only after it ends, so organizers can take attendance at the event. (2) "Mark all present" approves every confirmed student who isn't marked yet; each approval still goes through `approve_completion`, so it adds exactly one watering and repeating it changes nothing. (3) QR check-in (FR-016, Should): from 1 hour before the start until the end, the organizer or an admin taps "Start check-in", which gives the mission a random secret (`check_in_sessions`, readable only by the mission's organizer and admins). The screen shows a QR whose code is the first 12 hex characters of HMAC-SHA256(secret, mission ID and current minute), so it changes every minute; the current and previous minute's codes are accepted. Students scan it with the phone camera, which opens `/student/check-in/[id]`, and tap "I'm here"; `check_in` records one row in `check_ins` per assignment. The review screen shows who checked in. Checking in never approves attendance or waters a tree: the organizer still taps Present or Mark all present. (4) Demo seed: an in-progress mission "Campus Open Day Helpers" with Farid and Mei Lin confirmed, for the QR demo; `supabase/seed.sql` has the SQL to move it back into progress before a pitch. "Building D Cleaning Help" (ended, Farid and Mei Lin waiting) still serves demo step 5.
