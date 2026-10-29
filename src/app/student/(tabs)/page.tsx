@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, MagnifyingGlass } from "@phosphor-icons/react/ssr";
 import { Gauge, stageName } from "@/components/gauge";
 import { GrowthCelebration } from "@/components/growth-celebration";
+import { WateringDrop } from "@/components/watering-drop";
 import { getTreeStage, TREE_STAGES } from "@/lib/tree/tree";
 import { MissionIcon } from "@/components/mission-icon";
 import { loadMissionCards, openTo } from "@/lib/db/recommend";
@@ -47,8 +48,9 @@ export default async function StudentHome() {
         latestMission={latestMission}
       />
       <h1 className="text-center font-semibold">Hi, {me.displayName.split(" ")[0]}</h1>
-      <div className="mt-4">
+      <div className="relative mt-4">
         <Gauge waterings={waterings} />
+        <WateringDrop studentId={me.id} waterings={waterings} />
       </div>
 
       <Link href="/student/find" className="mt-6 flex items-center justify-center gap-2 rounded-full bg-tint py-4 font-medium text-on-tint">

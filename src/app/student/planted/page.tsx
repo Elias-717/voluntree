@@ -9,7 +9,7 @@ export default async function SeedPlanted() {
   return (
     <div className="flex flex-1 flex-col items-center px-4 pb-6 pt-16 text-center">
       <div className="relative mt-6 aspect-square w-64 rounded-full bg-tint">
-        <Image src="/tree/seed.svg" alt="A planted seed" fill priority className="object-contain p-8" />
+        <Image src="/tree/seed.svg" alt="A planted seed" fill priority className="seed-plant object-contain p-8" />
       </div>
       <h1 className="mt-8 text-[28px] font-semibold tracking-[-0.03em]">Your seed is planted</h1>
       <p className="mt-2 text-muted">

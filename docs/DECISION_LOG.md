@@ -444,3 +444,11 @@ Rules:
 - Reason: Approved by Elias after the Phase 2 exit check found that attendance could not be taken during a live demo. Elias chose a 1-minute code, scan records "checked in" (not approval), and a re-timeable demo mission.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-053 — Palm stage names and three growth animations
+- Date: 2026-10-29
+- Change: (1) The last two stage labels follow the date palm drawings: Seed, Sprout, Sapling, **Young palm**, **Date palm** (were Young tree, Full tree), e.g. "You grew a Date palm". Stage keys (`young-tree`, `full-tree`), file paths and `getTreeStage` are unchanged, and "tree" stays the product word (My tree, "waters your tree"). (2) Three CSS animations, all inside `prefers-reduced-motion: no-preference`, so with reduced motion each screen shows its final state: the "You grew" celebration (three drops fall, the old stage shrinks away, the new stage grows in with a soft glow); the student home gauge (when a new watering has arrived since the student last looked on this device, one drop falls into the tree and a ripple spreads; the count seen is kept on the device only, like the last stage seen); the "Your seed is planted" screen (the seed drops into the soil with a small bounce). (3) `.gitattributes` keeps `public/tree/*.svg` on LF endings, so Khathera's SVG checks pass on Windows checkouts too.
+- Affects: `src/components/gauge.tsx`, `growth-celebration.tsx`, new `water-drop.tsx` and `watering-drop.tsx`, `src/app/globals.css`, student home and planted screens, landing copy, `.gitattributes`; FR-027 presentation only.
+- Reason: Approved by Elias after Khathera's palm stages (PR #19) asked whether the labels should change; Elias also asked for animation.
+- Decided by: Elias
+- Supersedes: the "Young tree" and "Full tree" stage labels; also the "tree art unchanged" parts of DEC-030 and DEC-031, which DEC-051 replaced in practice but did not name (requested by Khathera in PR #19)
