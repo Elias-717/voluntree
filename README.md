@@ -213,10 +213,10 @@ docs/                  SRS, PRD, decision log (64 entries), AI usage logs
 
 | | Role |
 |---|---|
-| **Elias Al-Sumairi** | Team lead: product decisions, database, screens, AI intake |
-| **Khathera** | Matching engine, certificates, palm stages, evaluation |
-| **Wazhma Maroof** | Team member |
-| **Mohammed Khalid Abdo** | Team member |
+| **Elias Al-Sumairi** | Developer and team lead: database, screens, AI features, product decisions |
+| **Khathera** | Developer: matching engine, certificates, palm stages, evaluation |
+| **Wazhma Maroof** | Research: the survey of 20 students and the interview with the head warden |
+| **Mohammed Khalid Abdo** | Presenter: pitch and live demo |
 
 **AI declaration:** we used AI coding assistants and an LLM in the product. Every tool, model and prompt is logged in [`docs/ai-usage/`](docs/ai-usage), and the product's own AI calls are logged in the database (`ai_usage_log`).
 
