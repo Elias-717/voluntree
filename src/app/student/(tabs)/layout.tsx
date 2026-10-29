@@ -12,7 +12,11 @@ export default async function TabsLayout({ children }: { children: React.ReactNo
   return (
     <>
       <div className="relative flex flex-1 flex-col px-4 pb-6 pt-5">
-        <NotificationBell href="/student/inbox" count={count} className="absolute right-4 top-5 z-10" />
+        {/* Positioned by this wrapper: the bell itself is `relative` (for its badge), which would win
+            over `absolute` and leave it in the flow, on top of page titles and back buttons. */}
+        <div className="absolute right-4 top-5 z-10">
+          <NotificationBell href="/student/inbox" count={count} />
+        </div>
         {children}
       </div>
       <TabBar />
