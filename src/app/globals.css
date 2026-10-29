@@ -143,6 +143,9 @@
      Opacity only: a transform here would pin full-screen overlays ("You grew", the QR) to the page. */
   .page-enter { animation: fade-in 0.3s ease-out both; }
 
+  /* The inbox bell's count pops when it changes (it re-mounts with a new key), DEC-058. */
+  .badge-pop { animation: journey-pop 0.6s ease-out both; }
+
   /* Lists come in one row after another; rows that appear later (live updates) rise in on their own. */
   .stagger > * { animation: rise 0.4s ease-out both; }
   .stagger > :nth-child(2) { animation-delay: 60ms; }
