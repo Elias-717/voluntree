@@ -245,7 +245,7 @@ docs/                  SRS, PRD, decision log (64 entries), AI usage logs
 | | Role |
 |---|---|
 | **Elias Al-Sumairi** | Developer and team lead: database, screens, AI features, product decisions |
-| **Khathera** | Developer: matching engine, certificates, palm stages, evaluation |
+| **Khathera Rezaie** | Developer: matching engine, certificates, palm stages, evaluation |
 | **Wazhma Maroof** | Research: the student survey (n = 20) and the Student Affairs interview |
 | **Mohammed Khalid Abdo** | Presenter: pitch and live demo |
 

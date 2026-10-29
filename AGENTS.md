@@ -139,7 +139,7 @@ Finish each phase's exit check before starting the next. If time runs out, cut s
 
 Ask the owner about these when they become relevant. Do not decide them yourself.
 
-1. Team (updated 2026-10-29): Elias Al-Sumairi and Khathera (developers; Elias leads), Wazhma Maroof (research: student survey, n = 20, and a Student Affairs interview), Mohammed Khalid Abdo (presenter). Still open: whether everyone meets the final-year eligibility rule (SRS §15).
+1. Team (updated 2026-10-29): Elias Al-Sumairi and Khathera Rezaie (developers; Elias leads), Wazhma Maroof (research: student survey, n = 20, and a Student Affairs interview), Mohammed Khalid Abdo (presenter). Still open: whether everyone meets the final-year eligibility rule (SRS §15).
 2. Official competition dates.
 3. Resolved (DEC-021): a revoked approval marks its certificate revoked.
 4. Resolved (DEC-021): varied seeded history; the demo student starts at 2 waterings.
