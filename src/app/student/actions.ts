@@ -67,6 +67,22 @@ const ACCEPT_ERRORS: Record<string, string> = {
   ALREADY_REJECTED: "The dean didn't approve this one, so you can't join it again.",
 };
 
+const CHECK_IN_ERRORS: Record<string, string> = {
+  BAD_CODE: "This code has expired. Scan the QR on the organizer's screen again.",
+  NOT_ACCEPTED: "You aren't confirmed on this mission.",
+  NOT_OPEN: "Check-in isn't running for this mission right now.",
+};
+
+/** QR check-in (FR-016, DEC-052): records that the student is here. The organizer still approves attendance. */
+export async function checkIn(missionId: string, code: string): Promise<string | null> {
+  await requireRole("student");
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("check_in", { p_mission_id: missionId, p_code: code });
+  if (error) return CHECK_IN_ERRORS[error.message.split(":")[0]] ?? "Couldn't check in. Please try again.";
+  revalidatePath(`/student/check-in/${missionId}`);
+  return null;
+}
+
 export async function acceptMission(missionId: string): Promise<string | null> {
   await requireRole("student");
   const supabase = await createClient();

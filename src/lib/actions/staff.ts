@@ -5,8 +5,11 @@
 // (FR-009) and revocation with a reason (FR-010).
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import QRCode from "qrcode";
 import type { School } from "@/types/domain";
+import { checkInCode, checkInUrl, CODE_SECONDS, minuteOf } from "@/lib/check-in";
 import { createClient } from "@/lib/db/server";
 import { getMe, homeFor } from "@/lib/db/session";
 import { myOrganizationIds } from "@/lib/db/staff";
@@ -104,6 +107,54 @@ export async function markPresent(assignmentId: string, missionId: string): Prom
 /** Absent: no watering, no certificate. */
 export async function markAbsent(assignmentId: string, missionId: string): Promise<string | null> {
   return review("reject_completion", { p_assignment_id: assignmentId, p_note: null }, missionId);
+}
+
+/** Present for every confirmed student not yet marked. Each approval still adds exactly one watering (FR-009). */
+export async function markAllPresent(missionId: string): Promise<string | null> {
+  await requireStaff();
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("mission_assignments")
+    .select("id, completions(id)")
+    .eq("mission_id", missionId)
+    .eq("status", "ACCEPTED");
+  const unmarked = ((data ?? []) as { id: string; completions: { id: string }[] | { id: string } | null }[])
+    .filter((a) => !a.completions || (Array.isArray(a.completions) && a.completions.length === 0));
+  for (const a of unmarked) {
+    const error = await markPresent(a.id, missionId);
+    if (error) return error;
+  }
+  return null;
+}
+
+const CHECK_IN_ERRORS: Record<string, string> = {
+  NOT_OPEN: "Check-in runs from 1 hour before the start until the end of the mission.",
+  NOT_PUBLISHED: "Only published missions have check-in.",
+  FORBIDDEN: "Only this mission's organizer or an admin can start check-in.",
+};
+
+/** Start QR check-in (FR-016, DEC-052). Starting again keeps the same secret. */
+export async function openCheckIn(missionId: string): Promise<string | null> {
+  await requireStaff();
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("open_check_in", { p_mission_id: missionId });
+  if (error) return CHECK_IN_ERRORS[error.message.split(":")[0]] ?? "Couldn't start check-in.";
+  return null;
+}
+
+/** The QR for this minute, as an SVG, and the seconds until it changes. */
+export async function checkInQr(missionId: string): Promise<{ svg: string; secondsLeft: number } | { error: string }> {
+  await requireStaff();
+  const supabase = await createClient();
+  // Row-level security: only the mission's organizer and admins can read the secret.
+  const { data } = await supabase.from("check_in_sessions").select("secret").eq("mission_id", missionId).maybeSingle();
+  if (!data) return { error: "Check-in hasn't started." };
+  const now = Date.now();
+  const host = (await headers()).get("host");
+  const origin = `${host?.startsWith("localhost") ? "http" : "https"}://${host}`;
+  const url = checkInUrl(origin, missionId, checkInCode(data.secret, missionId, minuteOf(now)));
+  const svg = await QRCode.toString(url, { type: "svg", margin: 1, errorCorrectionLevel: "M" });
+  return { svg, secondsLeft: CODE_SECONDS - Math.floor(now / 1000) % CODE_SECONDS };
 }
 
 /** Admin revocation with a required reason (FR-010): removes one watering and revokes the certificate. */
