@@ -508,3 +508,11 @@ Rules:
 - Reason: Approved by Elias: admins need one place to see everyone and their status.
 - Decided by: Elias
 - Supersedes: none
+
+### DEC-061 — Demo data reset for Farid (one-off)
+- Date: 2026-10-29
+- Change: test activity from 29 October removed from the live demo data, run by Elias in the Supabase SQL editor (script kept outside the repo). (1) Clean revert of one test approval of Farid on "Building D Cleaning Help" (2:16 pm): its +1 watering, certificate and completion were deleted, with the `watering_ledger_append_only` and `certificates_never_deleted` guards switched off for that one transaction and back on before commit; the audit log keeps the record of the approval. Claude Code's permission layer refused to run this, so Elias ran it. (2) Farid's test joins on New Student Arrival, Red Cross, Green Kedah and SCI Code Arena removed (none had attendance recorded). (3) Guest accounts' joins removed and the guests deactivated (they can't be deleted: the append-only audit log references them). (4) The test missions "Green Kedah Community Clean-Up" and "SCI Code Arena Volunteer" cancelled; check-ins on "Campus Open Day Helpers" cleared. (5) Demo accounts' inboxes emptied. Result, verified: Farid at 5 waterings and 5 certificates, joined only to Building D (waiting for approval) and Campus Open Day; "For you" recommends New Student Arrival Welcome and Red Cross Kedah Flood Aid again.
+- Affects: live demo data only; NFR-07 append-only guards bypassed once for test data, deliberately.
+- Reason: Approved by Elias; the demo plan needs Farid at 5 waterings with open missions to accept, and the approval was a test, not a demo event.
+- Decided by: Elias
+- Supersedes: none
