@@ -81,6 +81,7 @@ const students = [
 ];
 const scenario: Scenario = {
   seed: 1,
+  configuration: "future",
   options: { students: 4, missions: 2, interestProbability: 1, gatedMissions: 1, history: "skewed" },
   students,
   missions: [mission("m1", "09:00", "11:00"), mission("m2", "10:00", "12:00", { eligibleSchools: ["SCI"] })],
