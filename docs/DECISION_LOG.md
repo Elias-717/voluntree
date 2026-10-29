@@ -420,3 +420,11 @@ Rules:
 - Reason: Approved by Elias; the Gemini project had no free tier and needed billing. Of the Groq models available to the key, a live test with a synthetic announcement showed only `openai/gpt-oss-120b` resolved "next Saturday" correctly (`openai/gpt-oss-20b` gave a Friday, `qwen/qwen3.8-27b` the week after); with the weekday in the prompt it was correct 5 times out of 5.
 - Decided by: Elias
 - Supersedes: the provider and model parts of DEC-046
+
+### DEC-051 — The tree becomes a palm tree
+- Date: 2026-10-29
+- Change: the tree is drawn as a palm everywhere. Landing page (screen 0): the WebGL model is a palm whose trunk is covered in sharp-edged diamond scales (old frond bases, in crossing spirals) and carries a crown of 16 feather fronds, standing on a low round plinth (a specimen base) that widens with the trunk, from just wider than the young palm's foot to full size; scrolling first opens fronds at ground level, then the trunk rises and carries the crown up. Student screens: Khathera redraws the 5 stage SVGs as a palm's life (date seed, spear leaf, trunkless young palm, short-trunk palm, full palm with dates), with a gentle CSS sway that stops under reduced motion (`docs/team/KHATHERA.md` Task 5). Stage names, stage IDs, the 3-watering step and `getTreeStage` are unchanged, and "tree" stays the product word.
+- Affects: `src/components/growing-tree.tsx`; `public/tree/` (Khathera); FR-027 stage art; DEC-006 stage drawings.
+- Reason: Approved by Elias; a palm (date palm) fits the campus setting and its life stages read clearly.
+- Decided by: Elias
+- Supersedes: the drawing style of the DEC-006 stages

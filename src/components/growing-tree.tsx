@@ -2,9 +2,9 @@
 
 // Landing scroll story (FR-001, DEC-026), adapted from the Lycoris Specimen component
 // (21st.dev/@kedhareswer): a scroll-scrubbed sticky stage built around one object, here a
-// procedurally modelled tree lit as green chrome in raw WebGL. Scroll is the timeline.
+// procedurally modelled palm tree lit as green chrome in raw WebGL. Scroll is the timeline.
 // Six frames: cover, crown, missions, matching, watering, grow. Between frames the camera
-// orbits, the tree flies, turns and keeps growing, and the type morphs into the next layout.
+// orbits, the palm flies, turns and keeps growing, and the type morphs into the next layout.
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -14,8 +14,8 @@ import { Plant } from "@phosphor-icons/react";
 type V3 = [number, number, number];
 type Curve = {
   pts: V3[];
-  /** 0 leaf ribbon, 1 branch tube, 2 trunk tube */
-  kind: 0 | 1 | 2;
+  /** 0 leaf ribbon, 1 frond stem tube, 2 trunk tube, 3 plinth (grows with the trunk, never moves) */
+  kind: 0 | 1 | 2 | 3;
   /** half-width of a leaf, radius of a tube */
   w: number;
   /** leaf width direction */
@@ -49,88 +49,120 @@ const rng = (seed: number) => {
 };
 
 const UP: V3 = [0, 1, 0];
-/** How long one curve takes to grow, in growth time. */
+/** How long one frond or leaflet takes to grow, in growth time. */
 const GROW = 0.18;
+/** How long the trunk takes to rise, in growth time. It carries the crown up with it. */
+const TRUNK_GROW = 0.9;
 const ROOT_Y = -1.6;
-/** Where leaves sit along a branch (0 base, 1 tip), by depth: trunk, then three levels of branches. */
-const LEAVES_ALONG = [
-  [0.42, 0.47, 0.52, 0.57],
-  [0.4, 0.7, 1],
-  [0.3, 0.475, 0.65, 0.825, 1],
-  [0.3, 0.3875, 0.475, 0.5625, 0.65, 0.7375, 0.825, 0.9125, 1],
-];
+const FRONDS = 16;
+/** The round base the palm stands on: radius and height. */
+const PLINTH_R = 0.22;
+const PLINTH_H = 0.095;
+const LEAFLETS = 18;
+/** Golden angle, so each new frond sits between the older ones, as on a real palm. */
+const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
 /**
- * The tree as centrelines. A trunk, three levels of branches that fork outwards and upwards,
- * and a cluster of leaves along every outer twig. Each child starts growing at the moment its
- * parent's tip passes the fork, so the tree grows up and out rather than all at once.
+ * The palm as centrelines. A tall, slightly curved trunk and a crown of feather fronds at its
+ * top: each frond a stem with pairs of narrow leaflets along both sides. The oldest fronds are
+ * the longest and droop; each newer one points higher, ending in an upright spear. Fronds open
+ * one after another and their leaflets unfold from base to tip, while the trunk rises slowly
+ * underneath (see the vertex shader), so the palm starts as a tuft of fronds on the ground.
  */
-const buildTree = (seed: number) => {
+const buildPalm = (seed: number) => {
   const r = rng(seed);
-  const wood: Curve[] = [];
   const leaves: Curve[] = [];
 
-  const branch = (from: V3, dir: V3, len: number, rad: number, depth: number, start: number) => {
-    const steps = 14;
-    const curl = norm([r() - 0.5, 0, r() - 0.5]);
-    const pts: V3[] = [from];
-    const dirs: V3[] = [dir];
-    let p = from;
-    let d = dir;
-    for (let k = 1; k <= steps; k++) {
-      d = norm(add(add(d, mul(UP, depth === 0 ? 0.01 : 0.035)), mul(curl, 0.045)));
-      p = add(p, mul(d, len / steps));
-      pts.push(p);
-      dirs.push(d);
+  // the trunk: leans a little, then turns back towards the sky
+  // six rings to every row of scales, so their edges stay sharp
+  const steps = BARK_ROWS * 6;
+  const root: V3 = [0, ROOT_Y, 0];
+  const pts: V3[] = [root];
+  let p = root;
+  let d = norm([0.12, 1, 0.05]);
+  for (let k = 1; k <= steps; k++) {
+    d = norm(add(d, [-0.235 / steps, 0, -0.1 / steps]));
+    p = add(p, mul(d, 2.45 / steps));
+    pts.push(p);
+  }
+  const top = pts[steps];
+  const trunk: Curve = { pts, kind: 2, w: 0.1, lat: perp(d), phase: 0, start: 0, base: root };
+
+  for (let i = 0; i < FRONDS; i++) {
+    // 0 for the oldest frond, 1 for the newest
+    const age = i / (FRONDS - 1);
+    const phi = i * GOLDEN + (r() - 0.5) * 0.3;
+    const el = -0.15 + 1.35 * age + (r() - 0.5) * 0.12;
+    const out: V3 = [Math.cos(phi), 0, Math.sin(phi)];
+    let fd = norm(add(mul(out, Math.cos(el)), [0, Math.sin(el), 0]));
+    const len = 1.4 - 0.55 * age + r() * 0.12;
+    const sag = 0.02 + 0.075 * (1 - age);
+    const start = 0.02 + 0.6 * age + r() * 0.02;
+    const n = 14;
+    const from = add(top, mul(out, 0.04));
+    const fp: V3[] = [from];
+    const fds: V3[] = [fd];
+    let q = from;
+    for (let k = 1; k <= n; k++) {
+      fd = norm(add(fd, [0, -sag, 0]));
+      q = add(q, mul(fd, len / n));
+      fp.push(q);
+      fds.push(fd);
     }
-    wood.push({ pts, kind: depth === 0 ? 2 : 1, w: rad, lat: perp(dir), phase: r() * 6, start, base: from });
+    // the stem is drawn with the leaves, so it takes their green
+    leaves.push({ pts: fp, kind: 1, w: 0.02, lat: perp(fds[0]), phase: r() * 6, start, base: from });
 
-    // Leaves on every branch, each opening as the growing tip passes it, so the tree is green
-    // at every stage. The trunk gets a few seedling leaves, the outer twigs the most.
-    leaf(pts, dirs, steps, start, LEAVES_ALONG[depth], depth === 0 ? 0.3 : 0.2);
-
-    if (depth < 3) {
-      const n = depth === 0 ? 4 : 3;
-      const spin = r() * Math.PI * 2;
-      for (let i = 0; i < n; i++) {
-        const t = depth === 0 ? 0.62 + (0.38 * (i + 1)) / n : 0.45 + (0.55 * (i + 1)) / n;
-        const at = Math.round(t * steps);
-        const phi = spin + (i / n) * Math.PI * 2 + (r() - 0.5) * 0.6;
-        const out: V3 = [Math.cos(phi), 0, Math.sin(phi)];
-        const cdir = norm(add(add(mul(dirs[at], 0.55), mul(out, 0.95 - depth * 0.12)), [0, 0.3 + r() * 0.25, 0]));
-        branch(pts[at], cdir, len * (depth === 0 ? 0.64 : 0.7), rad * 0.55, depth + 1, start + t * GROW);
+    for (let j = 0; j < LEAFLETS; j++) {
+      const t = 0.12 + (0.88 * j) / (LEAFLETS - 1);
+      const at = Math.round(t * n);
+      const fdir = fds[at];
+      const side = norm(cross(UP, fdir));
+      const L = 0.05 + 0.3 * Math.sin(Math.PI * (0.1 + 0.9 * t)) * (0.75 + 0.25 * (1 - age));
+      for (const sign of [1, -1]) {
+        // angled forward along the stem and lifted a little, so each pair makes a shallow V
+        const ldir = norm(add(add(mul(side, sign), mul(fdir, 0.7)), [0, 0.2, 0]));
+        const lp: V3[] = [fp[at]];
+        let c = fp[at];
+        for (let k = 1; k <= 8; k++) {
+          c = add(c, mul(norm(add(ldir, [0, -0.45 * (k / 8), 0])), L / 8));
+          lp.push(c);
+        }
+        leaves.push({
+          pts: lp, kind: 0, w: 0.022 + r() * 0.006, lat: norm(sub(fdir, mul(ldir, dot(fdir, ldir)))),
+          phase: r() * Math.PI * 2, start: start + (1 - Math.cbrt(1 - t)) * GROW + r() * 0.02, base: fp[at],
+        });
       }
     }
-  };
-
-  const leaf = (pts: V3[], dirs: V3[], steps: number, start: number, along: number[], size: number) => {
-    for (const t of along) {
-      const at = Math.round(t * steps);
-      const a = r() * Math.PI * 2;
-      const ldir = norm(add(add([Math.cos(a), r() - 0.3, Math.sin(a)], mul(dirs[at], 0.6)), [0, 0.1, 0]));
-      const L = size + r() * 0.09;
-      const lp: V3[] = [pts[at]];
-      let q = pts[at];
-      for (let k = 1; k <= 8; k++) {
-        const s = k / 8;
-        q = add(q, mul(norm(add(ldir, [0, -0.7 * s, 0])), L / 8));
-        lp.push(q);
-      }
-      leaves.push({
-        pts: lp, kind: 0, w: (0.05 + r() * 0.015) * (size / 0.2), lat: norm(cross(ldir, UP)),
-        phase: r() * Math.PI * 2, start: start + (1 - Math.cbrt(1 - t)) * GROW + r() * 0.03, base: pts[at],
-      });
-    }
-  };
-  branch([0, ROOT_Y, 0], [0.04, 1, 0.02], 1.5, 0.085, 0, 0);
+  }
 
   // The camera looks at the middle of the crown; the framing radius is the crown's reach.
   const heart: V3 = [0, 0, 0];
   for (const l of leaves) for (let i = 0; i < 3; i++) heart[i] += l.base[i] / leaves.length;
   let radius = 0;
-  for (const c of [...wood.slice(1), ...leaves])
+  for (const c of leaves)
     for (const q of c.pts) radius = Math.max(radius, Math.hypot(q[0] - heart[0], q[1] - heart[1], q[2] - heart[2]));
-  return { curves: [...wood, ...leaves], leafFrom: wood.length, heart, radius };
+  return { curves: [trunk, ...leaves], leafFrom: 1, heart, radius, rise: sub(top, root) };
+};
+
+/** Diamond scales around the trunk, and rows of them from foot to crown. */
+const BARK_AROUND = 7;
+const BARK_ROWS = 17;
+const fract = (x: number) => x - Math.floor(x);
+
+/**
+ * How far the trunk's surface stands out at height s (0 foot, 1 top) and angle a: the cut-off
+ * bases of old fronds, as diamond scales in two crossing spirals with sharp grooves between
+ * them. Smooth at the very foot, and softer near the crown, as on a real date palm.
+ */
+const bark = (s: number, a: number) => {
+  const x = (a / (Math.PI * 2)) * BARK_AROUND + s * 4;
+  const y = s * BARK_ROWS;
+  const p = fract(x + y);
+  const q = fract(x - y);
+  // 0 in a groove, 1 at a scale's centre
+  const d = Math.min(p, 1 - p, q, 1 - q) * 2;
+  const fade = smoothstep(0.03, 0.1, s) * (1 - 0.6 * smoothstep(0.75, 1, s));
+  return 0.32 * Math.pow(d, 0.6) * fade;
 };
 
 /** Interleaved vertex layout: pos 3, normal 3, aux 4 (s, phase, kind, start), base 3. */
@@ -141,12 +173,47 @@ const buildMesh = (curves: Curve[], leafFrom: number) => {
   const idx: number[] = [];
   let count = 0;
   let leafIndex = 0;
-  const data3 = (i: number): V3 => [v[i * STRIDE], v[i * STRIDE + 1], v[i * STRIDE + 2]];
   const push = (p: V3, n: V3, s: number, c: Curve) => {
     v.push(p[0], p[1], p[2], n[0], n[1], n[2], s, c.phase, c.kind, c.start, c.base[0], c.base[1], c.base[2]);
     return count++;
   };
   const tangent = (pts: V3[], i: number) => norm(sub(pts[Math.min(i + 1, pts.length - 1)], pts[Math.max(i - 1, 0)]));
+
+  // The plinth: a low disc turned on a lathe, its profile rounded over at both rims. Each band
+  // of the profile gets one normal, so the faces read flat and the rims catch a bright line.
+  const plinth: Curve = { pts: [], kind: 3, w: 0, lat: UP, phase: 0, start: 0, base: [0, ROOT_Y, 0] };
+  const top = ROOT_Y + 0.02;
+  const bevel = 0.035;
+  const profile: [number, number][] = [[0, top], [PLINTH_R - bevel, top]];
+  for (let j = 1; j <= 4; j++) {
+    const a = (j / 4) * (Math.PI / 2);
+    profile.push([PLINTH_R - bevel + Math.sin(a) * bevel, top - bevel + Math.cos(a) * bevel]);
+  }
+  for (let j = 0; j <= 4; j++) {
+    const a = (j / 4) * (Math.PI / 2);
+    profile.push([PLINTH_R - bevel + Math.cos(a) * bevel, top - PLINTH_H + bevel - Math.sin(a) * bevel]);
+  }
+  profile.push([0, top - PLINTH_H]);
+  const AROUND = 64;
+  for (let j = 0; j < profile.length - 1; j++) {
+    const [r0, y0] = profile[j];
+    const [r1, y1] = profile[j + 1];
+    const first = count;
+    for (let k = 0; k <= AROUND; k++) {
+      const a = (k / AROUND) * Math.PI * 2;
+      const cx = Math.cos(a);
+      const cz = Math.sin(a);
+      const nr = norm([(y1 - y0) * cx, r0 - r1, (y1 - y0) * cz]);
+      const n2: V3 = dot(nr, [cx, (y0 + y1) / 2 - (top - PLINTH_H / 2), cz]) < 0 ? mul(nr, -1) : nr;
+      push([r0 * cx, y0, r0 * cz], n2, 1, plinth);
+      push([r1 * cx, y1, r1 * cz], n2, 1, plinth);
+    }
+    for (let k = 0; k < AROUND; k++) {
+      const q = first + k * 2;
+      idx.push(q, q + 1, q + 2, q + 1, q + 3, q + 2);
+    }
+  }
+  const woodIndex = idx.length;
 
   curves.forEach((c, ci) => {
     if (ci === leafFrom) leafIndex = idx.length;
@@ -184,20 +251,39 @@ const buildMesh = (curves: Curve[], leafFrom: number) => {
       }
     } else {
       // Round tube on a parallel-transport frame, so it never corkscrews. Tapers to the tip.
-      const seg = c.kind === 2 ? 10 : 6;
+      // The trunk is wrapped in diamond scales, so its points come first and its normals are
+      // taken from the bumpy surface itself; otherwise the chrome would light it as a smooth pipe.
+      const seg = c.kind === 2 ? BARK_AROUND * 6 : 6;
       let N = perp(tangent(c.pts, 0));
-      const rings: number[] = [];
+      const grid: V3[][] = [];
+      const radial: V3[][] = [];
       for (let i = 0; i < n; i++) {
         const s = i / (n - 1);
         const T = tangent(c.pts, i);
         N = norm(sub(N, mul(T, dot(N, T))));
         const B = cross(T, N);
-        const rad = c.w * (1 - 0.45 * s) * (c.kind === 2 && s < 0.08 ? 1.6 - s * 7.5 : 1);
-        rings.push(count);
+        const row: V3[] = [];
+        const dirs: V3[] = [];
         for (let k = 0; k <= seg; k++) {
           const a = (k / seg) * Math.PI * 2;
           const nr = add(mul(N, Math.cos(a)), mul(B, Math.sin(a)));
-          push(add(c.pts[i], mul(nr, rad)), nr, s, c);
+          const rad = c.kind === 2 ? c.w * (1 - 0.25 * s) * (s < 0.06 ? 1.5 - s * 8.3 : 1) * (1 + bark(s, a)) : c.w * (1 - 0.45 * s);
+          row.push(add(c.pts[i], mul(nr, rad)));
+          dirs.push(nr);
+        }
+        grid.push(row);
+        radial.push(dirs);
+      }
+      const rings: number[] = [];
+      for (let i = 0; i < n; i++) {
+        const s = i / (n - 1);
+        rings.push(count);
+        for (let k = 0; k <= seg; k++) {
+          const around = sub(grid[i][(k + 1) % seg], grid[i][(k - 1 + seg) % seg]);
+          const up = sub(grid[Math.min(i + 1, n - 1)][k], grid[Math.max(i - 1, 0)][k]);
+          let nr = norm(cross(around, up));
+          if (dot(nr, radial[i][k]) < 0) nr = mul(nr, -1);
+          push(grid[i][k], nr, s, c);
         }
       }
       for (let i = 0; i < n - 1; i++) {
@@ -207,16 +293,9 @@ const buildMesh = (curves: Curve[], leafFrom: number) => {
           idx.push(a, a + 1, b, a + 1, b + 1, b);
         }
       }
-      if (c.kind === 2) {
-        // the trunk's foot: a flat cap, so it never reads as a cut pipe from below
-        const down = mul(tangent(c.pts, 0), -1);
-        const centre = push(c.pts[0], down, 0, c);
-        const rim = Array.from({ length: seg + 1 }, (_, k) => push(data3(rings[0] + k), down, 0, c));
-        for (let k = 0; k < seg; k++) idx.push(centre, rim[k + 1], rim[k]);
-      }
     }
   });
-  return { data: new Float32Array(v), index: new Uint16Array(idx), leafIndex };
+  return { data: new Float32Array(v), index: new Uint16Array(idx), woodIndex, leafIndex };
 };
 // #endregion
 
@@ -283,10 +362,10 @@ const KEYS_TALL: Partial<Key>[] = [
   { size: 0.96, oy: 1.0 },
 ];
 const SCENES = KEYS.length;
-/** How grown the tree is at the top of the page: a young sapling with its first branches and leaves. */
+/** How grown the palm is at the top of the page: a young palm, its first fronds on a short trunk. */
 const SPROUT = 0.3;
-/** Where the camera looks while the tree is still a sapling: the top of the trunk. */
-const SEEDLING_Y = ROOT_Y + 1.15;
+/** Where the camera looks while the palm is still young: its low crown. */
+const SEEDLING_Y = ROOT_Y + 0.6;
 const HOLD = 0.34;
 const NAV = ["Cover", "Crown", "Missions", "Matching", "Watering", "Grow"];
 
@@ -361,6 +440,7 @@ uniform vec2 u_offset;
 uniform float u_time;
 uniform float u_grow;
 uniform float u_sway;
+uniform vec3 u_rise;
 varying vec3 v_n;
 varying vec3 v_w;
 varying float v_s;
@@ -368,7 +448,17 @@ void main() {
   vec3 p = a_pos;
   float g = clamp((u_grow - a_aux.w) / ${GROW.toFixed(2)}, 0.0, 1.0);
   g = 1.0 - pow(1.0 - g, 3.0);
-  p = a_base + (p - a_base) * g;
+  // the trunk rises slowly from the root and lifts the whole crown with it
+  float t = clamp(u_grow / ${TRUNK_GROW.toFixed(2)}, 0.0, 1.0);
+  t = t * t * (3.0 - 2.0 * t);
+  if (a_aux.z > 2.5) {
+    // the plinth widens with the trunk, from just wider than a young palm's foot to full size
+    p = a_base + (p - a_base) * mix(0.15, 1.0, t);
+  } else if (a_aux.z > 1.5) {
+    p = a_base + (p - a_base) * t;
+  } else {
+    p = a_base + (p - a_base) * g + u_rise * (t - 1.0);
+  }
   if (a_aux.z < 0.5) {
     float amp = 0.025 * u_sway * (0.3 + a_aux.x);
     p += amp * vec3(sin(u_time * 1.7 + a_aux.y), 0.6 * sin(u_time * 2.3 + a_aux.y * 1.7), cos(u_time * 1.3 + a_aux.y * 1.3));
@@ -428,6 +518,7 @@ void main() {
 const DISPLAY = "var(--font-fraunces), Georgia, serif";
 const INK = "#0d0f0c";
 const BONE = "#d8d5c0";
+const PLINTH_CHROME = "#6f6a58";
 const LEAF = "#8dbb6e";
 const LEAF_CHROME = "#4f9a3c";
 const WOOD_CHROME = "#8a5a36";
@@ -511,7 +602,7 @@ export function GrowingTree() {
     if (!root || !stage || !canvas || !word) return;
     const reducedMq = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-    const { curves, leafFrom, heart, radius } = buildTree(11);
+    const { curves, leafFrom, heart, radius, rise } = buildPalm(11);
     const mesh = buildMesh(curves, leafFrom);
 
     // ---- GL ------------------------------------------------------------------
@@ -559,7 +650,7 @@ export function GrowingTree() {
       attr("a_nrm", 3, 3);
       attr("a_aux", 4, 6);
       attr("a_base", 3, 10);
-      for (const n of ["u_vp", "u_model", "u_offset", "u_time", "u_grow", "u_sway", "u_eye", "u_col", "u_hot"])
+      for (const n of ["u_vp", "u_model", "u_offset", "u_time", "u_grow", "u_sway", "u_rise", "u_eye", "u_col", "u_hot"])
         loc[n] = g.getUniformLocation(p, n);
       g.enable(g.DEPTH_TEST);
       g.clearColor(0, 0, 0, 0);
@@ -643,6 +734,7 @@ export function GrowingTree() {
 
     const leaf = hexToLinear(LEAF_CHROME);
     const wood = hexToLinear(WOOD_CHROME);
+    const stone = hexToLinear(PLINTH_CHROME);
 
     // ---- loop ----------------------------------------------------------------------
     let raf = 0;
@@ -716,11 +808,15 @@ export function GrowingTree() {
         g.uniform1f(loc.u_time, time);
         g.uniform1f(loc.u_grow, grow);
         g.uniform1f(loc.u_sway, moving ? 1 : 0);
+        g.uniform3f(loc.u_rise, rise[0], rise[1], rise[2]);
         g.uniform3f(loc.u_eye, eye[0], eye[1], eye[2]);
-        // wood, then leaves: same mesh, two ranges, two chrome tints
+        // plinth, wood, then leaves: same mesh, three ranges, three chrome tints
+        g.uniform3f(loc.u_col, stone[0] * 2.2, stone[1] * 2.2, stone[2] * 2.2);
+        g.uniform3f(loc.u_hot, 1, 1, 0.95);
+        g.drawElements(g.TRIANGLES, mesh.woodIndex, g.UNSIGNED_SHORT, 0);
         g.uniform3f(loc.u_col, wood[0] * 2.2, wood[1] * 2.2, wood[2] * 2.2);
         g.uniform3f(loc.u_hot, 1, 0.8, 0.6);
-        g.drawElements(g.TRIANGLES, mesh.leafIndex, g.UNSIGNED_SHORT, 0);
+        g.drawElements(g.TRIANGLES, mesh.leafIndex - mesh.woodIndex, g.UNSIGNED_SHORT, mesh.woodIndex * 2);
         g.uniform3f(loc.u_col, leaf[0] * 2.2, leaf[1] * 2.2, leaf[2] * 2.2);
         g.uniform3f(loc.u_hot, 0.85, 1, 0.7);
         g.drawElements(g.TRIANGLES, mesh.index.length - mesh.leafIndex, g.UNSIGNED_SHORT, mesh.leafIndex * 2);

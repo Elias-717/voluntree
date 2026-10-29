@@ -124,6 +124,27 @@ Wait for `src/types/domain.ts` and use only its types.
 
 **Done when:** one command reproduces the same numbers every time.
 
+### Task 5 — Palm tree stages (FR-027, DEC-051)
+
+The tree becomes a palm across the app. Elias changed the landing page's 3D tree; this task changes the 5 stage images students see (home gauge, My tree, the planted screen, "You grew").
+
+1. Redraw the 5 SVGs in `public/tree/` as a palm's life:
+   - `seed.svg`: a date seed in the soil.
+   - `sprout.svg`: a single spear leaf coming out of the soil.
+   - `sapling.svg`: a young palm with no trunk yet, a tuft of 3 to 4 feather fronds at ground level.
+   - `young-tree.svg`: a short ringed trunk with a small crown of fronds.
+   - `full-tree.svg`: a tall, slightly curved ringed trunk, a full crown of drooping feather fronds and a few date clusters under the crown.
+   - On the young and full palm, cover the trunk with diamond scales in crossing diagonal rows (the cut-off bases of old fronds, as on a real date palm), with sharp edges and a slightly darker groove between them, the same pattern as the landing page palm.
+2. Keep the file names, the 200×200 canvas and the soil at the bottom, so `getTreeStage` and its tests don't change. No text in the images. Flat shapes that read on a phone, in the same greens and browns as now.
+3. Animate inside each SVG with a `<style>` block (CSS keyframes, no script, so it still works when loaded through `<img>`):
+   - fronds sway gently from where they meet the trunk (a few degrees, about 4 to 6 seconds a cycle, each frond a little out of step);
+   - the seed and the spear leaf bob or lean slightly;
+   - wrap the animation in `@media (prefers-reduced-motion: no-preference)` so it stops when the device asks for reduced motion.
+4. The stage names stay Seed, Sprout, Sapling, Young tree and Full tree. Don't change `src/lib/tree/tree.ts` unless you find a reason; ask first.
+5. Check each stage on the student screens on a phone width, in light and dark mode.
+
+**Done when:** the 5 palm SVGs are merged, they sway on the student screens, they stay still with reduced motion on, and the tree tests still pass.
+
 ## Hand-off
 
 Elias's screens import these functions. Do not change a function's name or inputs once its pull request is merged without asking first.
