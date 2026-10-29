@@ -57,7 +57,8 @@ export async function saveMission(_state: string | null, form: FormData): Promis
   }
 
   // Eligibility criteria: admins only (FR-029). The database also rejects them from organizers.
-  if (me.role === "admin") {
+  // Locked criteria (BR-14) aren't sent by the form, so they're left as they are.
+  if (me.role === "admin" && !form.get("criteriaLocked")) {
     fields.eligible_schools = SCHOOLS.filter((s) => form.get(`school-${s}`) === "on");
     fields.min_cgpa = text("minCgpa") === "" ? null : Number(text("minCgpa"));
     fields.dean_approval_required = form.get("dean") === "on";
@@ -65,12 +66,16 @@ export async function saveMission(_state: string | null, form: FormData): Promis
       return "Minimum CGPA must be between 0.00 and 4.00.";
     }
   }
-  if (publish) {
+  const id = text("id");
+  // Saving changes to a mission that is already published keeps its original publish time (DEC-057).
+  const wasPublished = id
+    ? (await supabase.from("missions").select("status").eq("id", id).maybeSingle()).data?.status === "PUBLISHED"
+    : false;
+  if (publish && !wasPublished) {
     fields.status = "PUBLISHED";
     fields.published_at = new Date().toISOString();
   }
 
-  const id = text("id");
   let error;
   if (id) {
     ({ error } = await supabase.from("missions").update(fields).eq("id", id));
@@ -87,9 +92,15 @@ export async function saveMission(_state: string | null, form: FormData): Promis
   if (error) {
     if (error.message.startsWith("CRITERIA_LOCKED")) return "Eligibility can't change after a student has accepted.";
     if (error.message.startsWith("FORBIDDEN")) return "Only an admin can set eligibility criteria.";
+    // Editing a published mission (DEC-057).
+    if (error.message.startsWith("STARTED")) return "This mission has started, so it can't be edited any more.";
+    if (error.message.startsWith("TIME_LOCKED")) return "The date and time can't change once a student has joined.";
+    if (error.message.startsWith("CAPACITY_BELOW_HELD")) return `Slots can't go below the ${error.message.match(/\d+/)?.[0] ?? ""} students who have already joined.`;
     return "Couldn't save the mission. Please check the fields.";
   }
   revalidatePath(homeFor(me.role), "layout");
+  // After editing a published mission, go back to it; otherwise to the mission list.
+  if (wasPublished) redirect(`${homeFor(me.role)}/mission/${id}`);
   redirect(homeFor(me.role) + (me.role === "admin" ? "/missions" : ""));
 }
 

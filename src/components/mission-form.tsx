@@ -34,11 +34,16 @@ interface Props {
   draft?: MissionDraft;
   organizations?: { id: string; name: string }[];
   criteriaLocked?: boolean;
+  /** Editing a published mission (DEC-057): "Save changes" instead of Publish and Save draft. */
+  published?: boolean;
+  /** Students holding a spot. Any one locks the date and time; slots can't go below it. */
+  held?: number;
 }
 
-const input = "w-full rounded-[12px] border border-line bg-page px-3 py-2.5";
+const input = "w-full rounded-[12px] border border-line bg-page px-3 py-2.5 read-only:opacity-60";
 
-export function MissionForm({ admin, draft: saved = {}, organizations = [], criteriaLocked = false }: Props) {
+export function MissionForm({ admin, draft: saved = {}, organizations = [], criteriaLocked = false, published = false, held = 0 }: Props) {
+  const timeLocked = published && held > 0;
   const [error, formAction, pending] = useActionState(saveMission, null);
   // An AI draft replaces the starting values; the key remounts the inputs with them.
   const [draft, setDraft] = useState<MissionDraft>(saved);
@@ -57,6 +62,8 @@ export function MissionForm({ admin, draft: saved = {}, organizations = [], crit
       className="grid gap-6 lg:grid-cols-[1fr_260px]"
     >
       {draft.id && <input type="hidden" name="id" value={draft.id} />}
+      {/* Locked criteria aren't sent (the fieldset is disabled), so the save leaves them as they are. */}
+      {criteriaLocked && <input type="hidden" name="criteriaLocked" value="1" />}
       {ai && <input type="hidden" name="source" value="ai_draft" />}
       <div className="flex flex-col gap-4 rounded-[22px] border border-line bg-card p-5">
         {!draft.id && (
@@ -97,11 +104,17 @@ export function MissionForm({ admin, draft: saved = {}, organizations = [], crit
           <Field label="Skills (optional, comma separated)"><input name="skills" defaultValue={draft.skills} placeholder="cleaning, teamwork" className={input} /></Field>
         </div>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <Field label="Date"><input type="date" name="date" defaultValue={draft.date} className={input} /></Field>
-          <Field label="Start"><input type="time" name="start" defaultValue={draft.start} className={input} /></Field>
-          <Field label="End"><input type="time" name="end" defaultValue={draft.end} className={input} /></Field>
-          <Field label="Slots"><input type="number" name="capacity" min={1} defaultValue={draft.capacity ?? ""} placeholder="Required" className={input} /></Field>
+          {/* Read-only, not disabled, when locked: read-only values are still sent, so the time is kept. */}
+          <Field label="Date"><input type="date" name="date" defaultValue={draft.date} readOnly={timeLocked} className={input} /></Field>
+          <Field label="Start"><input type="time" name="start" defaultValue={draft.start} readOnly={timeLocked} className={input} /></Field>
+          <Field label="End"><input type="time" name="end" defaultValue={draft.end} readOnly={timeLocked} className={input} /></Field>
+          <Field label="Slots"><input type="number" name="capacity" min={Math.max(1, held)} defaultValue={draft.capacity ?? ""} placeholder="Required" className={input} /></Field>
         </div>
+        {timeLocked && (
+          <p className="-mt-2 text-xs text-muted">
+            Date and time are locked: {held} {held === 1 ? "student has" : "students have"} already joined. Slots can&apos;t go below {held}.
+          </p>
+        )}
         <Field label="Safety notes (optional)"><input name="safety" defaultValue={draft.safety} className={input} /></Field>
 
         {admin ? (
@@ -136,21 +149,28 @@ export function MissionForm({ admin, draft: saved = {}, organizations = [], crit
 
       <aside className="flex flex-col gap-3">
         <div className="rounded-[22px] border border-line bg-card p-5 text-sm">
-          <p className="font-semibold">Ready to publish?</p>
+          <p className="font-semibold">{published ? "Published" : "Ready to publish?"}</p>
           <ul className="mt-3 flex flex-col gap-2 text-muted">
             {["Title", "Description", "Place", "Date and time", "Slots"].map((t) => (
               <li key={t} className="flex items-center gap-2"><Check size={14} aria-hidden /> {t}</li>
             ))}
           </ul>
-          <p className="mt-3 text-xs text-muted">Drafts can be incomplete. Publishing needs every item.</p>
+          <p className="mt-3 text-xs text-muted">
+            {published
+              ? "Students see changes straight away. They aren't notified, so mention big changes to them yourself."
+              : "Drafts can be incomplete. Publishing needs every item."}
+          </p>
         </div>
         {error && <p role="alert" className="rounded-[14px] bg-brown-tint p-3 text-sm text-brown">{error}</p>}
+        {/* A published mission keeps the publish checks (every field, future start) when saved. */}
         <button name="intent" value="publish" disabled={pending} className="rounded-full bg-primary py-3 font-medium text-on-primary disabled:opacity-60">
-          {pending ? "Saving…" : "Publish"}
+          {pending ? "Saving…" : published ? "Save changes" : "Publish"}
         </button>
-        <button name="intent" value="draft" disabled={pending} className="rounded-full border border-strong py-3 font-medium">
-          Save draft
-        </button>
+        {!published && (
+          <button name="intent" value="draft" disabled={pending} className="rounded-full border border-strong py-3 font-medium">
+            Save draft
+          </button>
+        )}
       </aside>
     </form>
   );
